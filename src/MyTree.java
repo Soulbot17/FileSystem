@@ -28,8 +28,9 @@ public class MyTree extends JFrame {
 
     public MyTree() throws HeadlessException {
         super("My Tree Test");
-        setSize(600,440);
 
+        setSize(Toolkit.getDefaultToolkit().getScreenSize().width/2,Toolkit.getDefaultToolkit().getScreenSize().height/2);
+        setLocationRelativeTo(null);
         DefaultMutableTreeNode top = new DefaultMutableTreeNode(new IconData(COMPUTER_ICON,null,"PC"));
 
         DefaultMutableTreeNode node;
@@ -41,7 +42,6 @@ public class MyTree extends JFrame {
         }
         mytreemodel = new DefaultTreeModel(top);
         mytree = new JTree(mytreemodel);
-
         //WTF
         mytree.putClientProperty("JTree.lineStyle","Aligned");
 
@@ -56,6 +56,8 @@ public class MyTree extends JFrame {
         mytree.setEditable(false);
         //WTF ENDS
         JScrollPane p = new JScrollPane(mytree);
+        p.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
+        p.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         add(p,BorderLayout.CENTER);
         addWindowListener(new WindowAdapter() {
             @Override
@@ -65,7 +67,15 @@ public class MyTree extends JFrame {
         });
         mydisplay = new JTextField();
         mydisplay.setEditable(false);
-        getContentPane().add(mydisplay,BorderLayout.NORTH);
+
+        JPanel panelLeft = new JPanel(new BorderLayout());
+        Dimension d = new Dimension((int) (this.getWidth()*0.33),this.getHeight());
+        mytree.setPreferredSize(d);
+        setResizable(false);
+        panelLeft.add(p,BorderLayout.CENTER);
+        panelLeft.add(mydisplay,BorderLayout.SOUTH);
+
+        getContentPane().add(panelLeft,BorderLayout.WEST);
         setVisible(true);
     }
 
