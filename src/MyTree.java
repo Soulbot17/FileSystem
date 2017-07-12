@@ -11,13 +11,14 @@ import java.io.File;
 import java.util.Vector;
 
 /**
- * Created by SuperDenissio on 11.07.2017.
+ * Created by Soulbot17
  */
 public class MyTree extends JFrame {
     public static final ImageIcon DISK_ICON = new ImageIcon("src/iconset/disk24.png");
     public static final ImageIcon FOLDER_ICON = new ImageIcon("src/iconset/folder24.png");
     public static final ImageIcon EXPENDED_ICON = new ImageIcon("src/iconset/expfolder24.png");
     public static final ImageIcon COMPUTER_ICON = new ImageIcon("src/iconset/computer24.png");
+
     protected JTree mytree;
     protected JTextField mydisplay;
     protected DefaultTreeModel mytreemodel;
