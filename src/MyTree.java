@@ -21,7 +21,11 @@ public class MyTree extends JFrame {
     protected JTree mytree;
     protected JTextField mydisplay;
     protected DefaultTreeModel mytreemodel;
-
+    protected String my_currentdirectory = null;
+    protected JPanel panelLeft = new JPanel(new BorderLayout());
+    protected JPanel panelRight = new JPanel(new BorderLayout());
+    protected JList jList = new JList();
+    protected Vector nullvector = new Vector();
     public static void main(String[] args) {
         new MyTree();
     }
@@ -65,17 +69,17 @@ public class MyTree extends JFrame {
                 System.exit(0);
             }
         });
-        mydisplay = new JTextField();
+        mydisplay = new JTextField(32);
         mydisplay.setEditable(false);
 
-        JPanel panelLeft = new JPanel(new BorderLayout());
         Dimension d = new Dimension((int) (this.getWidth()*0.33),this.getHeight());
         mytree.setPreferredSize(d);
         setResizable(false);
         panelLeft.add(p,BorderLayout.CENTER);
         panelLeft.add(mydisplay,BorderLayout.SOUTH);
-
         getContentPane().add(panelLeft,BorderLayout.WEST);
+        panelRight.add(jList,BorderLayout.CENTER);
+        getContentPane().add(panelRight,BorderLayout.CENTER);
         setVisible(true);
     }
 
@@ -128,8 +132,21 @@ public class MyTree extends JFrame {
         public void valueChanged(TreeSelectionEvent e) {
             DefaultMutableTreeNode node = getTreeNode(e.getPath());
             FileNode fnode = getFileNode(node);
+            Vector<File> vfiles = new Vector<>();
             if (fnode!=null) {
-                mydisplay.setText(fnode.getFile().getAbsolutePath());
+                String tempo = fnode.getFile().getAbsolutePath();
+                my_currentdirectory = tempo;
+                mydisplay.setText(tempo);
+                File file = new File(tempo);
+                File[] files = file.listFiles();
+                if (files!=null&&files.length>0) {
+                    for (int i = 0; i<files.length;i++) {
+                        if (!files[i].isDirectory()) {
+                            vfiles.add(files[i]);
+                        } else continue;
+                    }
+                    jList.setListData(vfiles);
+                } else jList.setListData(nullvector);
             } else mydisplay.setText("");
         }
     }
