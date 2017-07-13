@@ -1,5 +1,6 @@
 import javax.swing.*;
 import javax.swing.event.*;
+import javax.swing.filechooser.FileSystemView;
 import javax.swing.tree.*;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
@@ -416,20 +417,26 @@ public class MyTree extends JFrame {
     class MyListCellRenderer extends DefaultListCellRenderer {
         @Override
         public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+            FileSystemView view = FileSystemView.getFileSystemView();
             JLabel label = (JLabel) super.getListCellRendererComponent(list,value,index,isSelected,cellHasFocus);
-            String cellText = getFileName(value.toString());
-            String values = getFileExtension(value.toString());
-            label.setText(cellText);
-            if (values!=null&&c_textExtensions.contains(values)) {
-                label.setIcon(TEXT_ICON);
-                label.setHorizontalTextPosition(RIGHT);
-            } else if (values!=null&&c_graphicExtensions.contains(values)) {
-                label.setIcon(GRAPHIC_ICON);
-                label.setHorizontalTextPosition(RIGHT);
-            } else {
-                label.setIcon(NOEX_ICON);
-                label.setHorizontalTextPosition(RIGHT);
-            }
+            label.setText(view.getSystemDisplayName((File) value));
+            label.setIcon(view.getSystemIcon((File) value));
+            label.setHorizontalTextPosition(RIGHT);
+
+//            String cellText = getFileName(value.toString());
+//            String values = getFileExtension(value.toString());
+//            label.setText(cellText);
+//            if (values!=null&&c_textExtensions.contains(values)) {
+//                label.setIcon(TEXT_ICON);
+//                label.setHorizontalTextPosition(RIGHT);
+//            } else if (values!=null&&c_graphicExtensions.contains(values)) {
+//                label.setIcon(GRAPHIC_ICON);
+//                label.setHorizontalTextPosition(RIGHT);
+//            } else {
+//                label.setIcon(NOEX_ICON);
+//                label.setHorizontalTextPosition(RIGHT);
+//            }
+
             return label;
         }
 
