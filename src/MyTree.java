@@ -1,3 +1,5 @@
+import javafx.scene.control.RadioButton;
+
 import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.filechooser.FileSystemView;
@@ -7,7 +9,6 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Vector;
 
 /**
@@ -15,8 +16,6 @@ import java.util.Vector;
  */
 /*
 @TODO:
--icons for files
--short names for files
 -upper bar with delete folder / create folder
 
 @BUGS:
@@ -24,8 +23,6 @@ import java.util.Vector;
 */
 
 public class MyTree extends JFrame {
-    public static ArrayList<String> c_textExtensions;
-    public static ArrayList<String> c_graphicExtensions;
     public static final ImageIcon DISK_ICON = new ImageIcon("src/iconset/disk24.png");
     public static final ImageIcon FOLDER_ICON = new ImageIcon("src/iconset/folder24.png");
     public static final ImageIcon EXPENDED_ICON = new ImageIcon("src/iconset/expfolder24.png");
@@ -46,6 +43,7 @@ public class MyTree extends JFrame {
     protected JLabel my_infoNameText = new JLabel("File name: no file selected yet.");
     protected JLabel my_infoSizeText = new JLabel("File size: ...");
     protected JLabel my_infoEditedText = new JLabel("File last edited: ...");
+    protected JLabel my_infoPathText = new JLabel("File path: ...");
     protected JScrollPane paneTree;
 
     public static void main(String[] args) {
@@ -54,8 +52,6 @@ public class MyTree extends JFrame {
 
     public MyTree() throws HeadlessException {
         super("FileDude");
-        listInit();
-        myselectedfileinfo = "File name: no file selected yet";
         setSize(Toolkit.getDefaultToolkit().getScreenSize().width/2,Toolkit.getDefaultToolkit().getScreenSize().height/2);
         setLocationRelativeTo(null);
         DefaultMutableTreeNode top = new DefaultMutableTreeNode(new IconData(COMPUTER_ICON,null,"PC"));
@@ -124,7 +120,8 @@ public class MyTree extends JFrame {
                 my_infoNameText.setText(String.format("File name: %s",myselectedfileinfo));
                 my_infoSizeText.setText(String.format("File size: %s",bytes));
                 SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy, HH:mm:ss");
-                my_infoEditedText.setText(String.format("File created: %s",sdf.format(file.lastModified())));
+                my_infoEditedText.setText(String.format("File last edited: %s",sdf.format(file.lastModified())));
+                my_infoPathText.setText("File path: "+file.getAbsolutePath());
             }
         }
 
@@ -135,17 +132,6 @@ public class MyTree extends JFrame {
             String pre = (si ? "kMGTPE" : "KMGTPE").charAt(exp-1) + (si ? "" : "i");
             return String.format("%.1f %sB", bytes / Math.pow(unit, exp), pre);
         }
-    }
-    void listInit(){
-        c_graphicExtensions = new ArrayList<>();
-        c_textExtensions = new ArrayList<>();
-
-        c_textExtensions.add(".txt");
-        c_textExtensions.add(".doc");
-
-        c_graphicExtensions.add(".jpeg");
-        c_graphicExtensions.add(".png");
-        c_graphicExtensions.add(".img");
     }
 
     protected JPanel creteInfoPanel(){
@@ -160,8 +146,11 @@ public class MyTree extends JFrame {
         panel.add(my_infoSizeText);
         my_infoEditedText.setFont(font);
         panel.add(my_infoEditedText);
+        my_infoPathText.setFont(font);
+        panel.add(my_infoPathText);
         return panel;
     }
+
 
     DefaultMutableTreeNode getTreeNode(TreePath path) {
         return (DefaultMutableTreeNode) path.getLastPathComponent();
@@ -187,6 +176,13 @@ public class MyTree extends JFrame {
             Thread runner = new Thread(){
               public void run(){
                   if (fnode!=null&&fnode.expand(node)) {
+                      /*
+                      ADDITIONAL TASK 1
+                      try {
+                          Thread.sleep(2000);
+                      } catch (InterruptedException e) {
+                          e.printStackTrace();
+                      }*/
                       Runnable runnable = new Runnable() {
                           @Override
                           public void run() {
@@ -195,7 +191,6 @@ public class MyTree extends JFrame {
                       };
                       SwingUtilities.invokeLater(runnable);
                   }
-
               }
             };
             runner.start();
@@ -209,6 +204,7 @@ public class MyTree extends JFrame {
     class DirSelectionListener implements TreeSelectionListener{
         @Override
         public void valueChanged(TreeSelectionEvent e) {
+            clearInfoPanel();
             DefaultMutableTreeNode node = getTreeNode(e.getPath());
             FileNode fnode = getFileNode(node);
             Vector<File> vfiles = new Vector<>();
@@ -228,6 +224,13 @@ public class MyTree extends JFrame {
             } else mydisplay.setText("");
         }
     }
+
+    protected void clearInfoPanel(){
+        my_infoNameText.setText("File name: no file selected yet.");
+        my_infoSizeText.setText("File size: ...");
+        my_infoEditedText.setText("File last edited: ...");
+        my_infoPathText.setText("File path: ...");
+    };
 
     class IconCellRenderer extends JLabel implements TreeCellRenderer{
         protected Color my_textSelectionColor;
@@ -420,29 +423,10 @@ public class MyTree extends JFrame {
             FileSystemView view = FileSystemView.getFileSystemView();
             JLabel label = (JLabel) super.getListCellRendererComponent(list,value,index,isSelected,cellHasFocus);
             label.setText(view.getSystemDisplayName((File) value));
+            label.setFont(new Font(Font.DIALOG,Font.PLAIN,14));
             label.setIcon(view.getSystemIcon((File) value));
             label.setHorizontalTextPosition(RIGHT);
-
-//            String cellText = getFileName(value.toString());
-//            String values = getFileExtension(value.toString());
-//            label.setText(cellText);
-//            if (values!=null&&c_textExtensions.contains(values)) {
-//                label.setIcon(TEXT_ICON);
-//                label.setHorizontalTextPosition(RIGHT);
-//            } else if (values!=null&&c_graphicExtensions.contains(values)) {
-//                label.setIcon(GRAPHIC_ICON);
-//                label.setHorizontalTextPosition(RIGHT);
-//            } else {
-//                label.setIcon(NOEX_ICON);
-//                label.setHorizontalTextPosition(RIGHT);
-//            }
-
             return label;
-        }
-
-        private String getFileExtension(String mystr) {
-            int index = mystr.indexOf('.');
-            return index == -1? null : mystr.substring(index);
         }
     }
 }
