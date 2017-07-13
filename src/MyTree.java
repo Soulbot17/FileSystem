@@ -27,9 +27,6 @@ public class MyTree extends JFrame {
     public static final ImageIcon FOLDER_ICON = new ImageIcon("src/iconset/folder24.png");
     public static final ImageIcon EXPENDED_ICON = new ImageIcon("src/iconset/expfolder24.png");
     public static final ImageIcon COMPUTER_ICON = new ImageIcon("src/iconset/computer24.png");
-    public static final ImageIcon TEXT_ICON = new ImageIcon("src/iconset/text24.png");
-    public static final ImageIcon GRAPHIC_ICON = new ImageIcon("src/iconset/pic24.png");
-    public static final ImageIcon NOEX_ICON = new ImageIcon("src/iconset/noex24.png");
 
     protected JPanel myinfopanel;
     protected JTree mytree;
