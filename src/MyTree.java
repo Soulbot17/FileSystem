@@ -1,39 +1,62 @@
 import javax.swing.*;
-import javax.swing.event.TreeExpansionEvent;
-import javax.swing.event.TreeExpansionListener;
-import javax.swing.event.TreeSelectionEvent;
-import javax.swing.event.TreeSelectionListener;
+import javax.swing.border.BevelBorder;
+import javax.swing.border.LineBorder;
+import javax.swing.event.*;
 import javax.swing.tree.*;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Vector;
 
 /**
  * Created by Soulbot17
  */
+/*
+@TODO:
+-icons for files
+-short names for files
+-upper bar with delete folder / create folder
+
+@BUGS:
+-something wrong with scrollbar.
+
+*/
+
 public class MyTree extends JFrame {
+    public static ArrayList<String> c_textExtensions;
+    public static ArrayList<String> c_graphicExtensions;
     public static final ImageIcon DISK_ICON = new ImageIcon("src/iconset/disk24.png");
     public static final ImageIcon FOLDER_ICON = new ImageIcon("src/iconset/folder24.png");
     public static final ImageIcon EXPENDED_ICON = new ImageIcon("src/iconset/expfolder24.png");
     public static final ImageIcon COMPUTER_ICON = new ImageIcon("src/iconset/computer24.png");
+    public static final ImageIcon TEXT_ICON = new ImageIcon("src/iconset/text24.png");
+    public static final ImageIcon GRAPHIC_ICON = new ImageIcon("src/iconset/pic24.png");
+    public static final ImageIcon NOEX_ICON = new ImageIcon("src/iconset/noex24.png");
 
+    protected JPanel myinfopanel;
     protected JTree mytree;
     protected JTextField mydisplay;
     protected DefaultTreeModel mytreemodel;
-    protected String my_currentdirectory = null;
     protected JPanel panelLeft = new JPanel(new BorderLayout());
     protected JPanel panelRight = new JPanel(new BorderLayout());
     protected JList jList = new JList();
     protected Vector nullvector = new Vector();
+    protected String myselectedfileinfo;
+    protected JLabel my_infoNameText = new JLabel("File name: no file selected yet.");
+    protected JLabel my_infoSizeText = new JLabel("File size: ...");
+    protected JLabel my_infoEditedText = new JLabel("File last edited: ...");
+
     public static void main(String[] args) {
         new MyTree();
     }
 
     public MyTree() throws HeadlessException {
         super("My Tree Test");
-
+        listInit();
+        myselectedfileinfo = "File name: no file selected yet";
         setSize(Toolkit.getDefaultToolkit().getScreenSize().width/2,Toolkit.getDefaultToolkit().getScreenSize().height/2);
         setLocationRelativeTo(null);
         DefaultMutableTreeNode top = new DefaultMutableTreeNode(new IconData(COMPUTER_ICON,null,"PC"));
@@ -59,9 +82,15 @@ public class MyTree extends JFrame {
         mytree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
         mytree.setShowsRootHandles(true);
         mytree.setEditable(false);
+        mydisplay = new JTextField(32);
+        mydisplay.setEditable(false);
+        Dimension d = new Dimension((int) (this.getWidth()*0.33),this.getHeight()-mydisplay.getWidth());
+        mytree.setPreferredSize(d);
         //WTF ENDS
+        mytree.setVisibleRowCount(10);
         JScrollPane p = new JScrollPane(mytree);
-        p.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
+
+        p.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
         p.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         add(p,BorderLayout.CENTER);
         addWindowListener(new WindowAdapter() {
@@ -70,18 +99,67 @@ public class MyTree extends JFrame {
                 System.exit(0);
             }
         });
-        mydisplay = new JTextField(32);
-        mydisplay.setEditable(false);
 
-        Dimension d = new Dimension((int) (this.getWidth()*0.33),this.getHeight());
-        mytree.setPreferredSize(d);
-        setResizable(false);
+        myinfopanel = creteInfoPanel();
+//        setResizable(false);
         panelLeft.add(p,BorderLayout.CENTER);
         panelLeft.add(mydisplay,BorderLayout.SOUTH);
         getContentPane().add(panelLeft,BorderLayout.WEST);
+        jList.setCellRenderer(new MyListCellRenderer());
+        jList.addListSelectionListener(new MyListSelectionListener());
         panelRight.add(jList,BorderLayout.CENTER);
+        panelRight.add(myinfopanel,BorderLayout.SOUTH);
         getContentPane().add(panelRight,BorderLayout.CENTER);
         setVisible(true);
+    }
+
+    protected class MyListSelectionListener implements ListSelectionListener {
+        @Override
+        public void valueChanged(ListSelectionEvent e) {
+            if (e.getValueIsAdjusting()){
+                File file = new File(jList.getSelectedValue().toString());
+                myselectedfileinfo = getFileName(jList.getSelectedValue().toString());
+                String bytes = humanReadableByteCount(file.length(),true);
+                my_infoNameText.setText(String.format("File name: %s",myselectedfileinfo));
+                my_infoSizeText.setText(String.format("File size: %s",bytes));
+                SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy, HH:mm:ss");
+                my_infoEditedText.setText(String.format("File created: %s",sdf.format(file.lastModified())));
+            }
+        }
+
+        public String humanReadableByteCount(long bytes, boolean si) { //stolen awesome method to display readable byte
+            int unit = si ? 1000 : 1024;
+            if (bytes < unit) return bytes + " B";
+            int exp = (int) (Math.log(bytes) / Math.log(unit));
+            String pre = (si ? "kMGTPE" : "KMGTPE").charAt(exp-1) + (si ? "" : "i");
+            return String.format("%.1f %sB", bytes / Math.pow(unit, exp), pre);
+        }
+    }
+    void listInit(){
+        c_graphicExtensions = new ArrayList<>();
+        c_textExtensions = new ArrayList<>();
+
+        c_textExtensions.add(".txt");
+        c_textExtensions.add(".doc");
+
+        c_graphicExtensions.add(".jpeg");
+        c_graphicExtensions.add(".png");
+        c_graphicExtensions.add(".img");
+    }
+
+    protected JPanel creteInfoPanel(){
+        JPanel panel = new JPanel();
+        Font font = new Font(Font.SANS_SERIF,Font.PLAIN,12);
+        panel.setLayout(new BoxLayout(panel,BoxLayout.Y_AXIS));
+        panel.setFocusable(false);
+        panel.setBorder(BorderFactory.createEtchedBorder());
+        my_infoNameText.setFont(font);
+        panel.add(my_infoNameText);
+        my_infoSizeText.setFont(font);
+        panel.add(my_infoSizeText);
+        my_infoEditedText.setFont(font);
+        panel.add(my_infoEditedText);
+        return panel;
     }
 
     DefaultMutableTreeNode getTreeNode(TreePath path) {
@@ -136,7 +214,6 @@ public class MyTree extends JFrame {
             Vector<File> vfiles = new Vector<>();
             if (fnode!=null) {
                 String tempo = fnode.getFile().getAbsolutePath();
-                my_currentdirectory = tempo;
                 mydisplay.setText(tempo);
                 File file = new File(tempo);
                 File[] files = file.listFiles();
@@ -163,11 +240,11 @@ public class MyTree extends JFrame {
 
         public IconCellRenderer() {
             super();
-            my_textSelectionColor = UIManager.getColor("Tree.selectionForegroung");
-            my_textNonSelectedColor = UIManager.getColor("Tree.textForegroung");
+            my_textSelectionColor = UIManager.getColor("Tree.selectionForeground");
+            my_textNonSelectedColor = UIManager.getColor("Tree.textForeground");
             my_bkSelectedColor = UIManager.getColor("Tree.selectionBackground");
             my_bkNonSelectedColor = UIManager.getColor("Tree.textBackground");
-            my_borderSelectedColor = UIManager.getColor("Tree.selectionBorderBolor");
+            my_borderSelectedColor = UIManager.getColor("Tree.selectionBorderColor");
             setOpaque(false);
         }
 
@@ -329,6 +406,37 @@ public class MyTree extends JFrame {
 
         public String toString() {
             return n_data.toString();
+        }
+    }
+
+    protected String getFileName(String filepath){
+        String fileName = filepath.substring(filepath.lastIndexOf("\\")+1,filepath.length());
+        return fileName;
+    }
+
+    class MyListCellRenderer extends DefaultListCellRenderer {
+        @Override
+        public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+            JLabel label = (JLabel) super.getListCellRendererComponent(list,value,index,isSelected,cellHasFocus);
+            String cellText = getFileName(value.toString());
+            String values = getFileExtension(value.toString());
+            label.setText(cellText);
+            if (values!=null&&c_textExtensions.contains(values)) {
+                label.setIcon(TEXT_ICON);
+                label.setHorizontalTextPosition(RIGHT);
+            } else if (values!=null&&c_graphicExtensions.contains(values)) {
+                label.setIcon(GRAPHIC_ICON);
+                label.setHorizontalTextPosition(RIGHT);
+            } else {
+                label.setIcon(NOEX_ICON);
+                label.setHorizontalTextPosition(RIGHT);
+            }
+            return label;
+        }
+
+        private String getFileExtension(String mystr) {
+            int index = mystr.indexOf('.');
+            return index == -1? null : mystr.substring(index);
         }
     }
 }

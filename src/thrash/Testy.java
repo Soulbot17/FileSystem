@@ -1,6 +1,8 @@
 package thrash;
 
 import javax.swing.*;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import java.awt.*;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -29,6 +31,15 @@ public class Testy {
         JList list = new JList(animalsList);
         list.setCellRenderer(new AnimalsRenderer());
 
+        list.addListSelectionListener(new ListSelectionListener() {
+            @Override
+            public void valueChanged(ListSelectionEvent e) {
+                if (e.getValueIsAdjusting()) {
+                    System.out.println(list.getSelectedValue());
+                }
+
+            }
+        });
         JScrollPane pane = new JScrollPane(list);
 
         JFrame frame = new JFrame("idk");
