@@ -1,6 +1,4 @@
 import javax.swing.*;
-import javax.swing.border.BevelBorder;
-import javax.swing.border.LineBorder;
 import javax.swing.event.*;
 import javax.swing.tree.*;
 import java.awt.*;
@@ -21,7 +19,6 @@ import java.util.Vector;
 -upper bar with delete folder / create folder
 
 @BUGS:
--something wrong with scrollbar.
 
 */
 
@@ -48,13 +45,14 @@ public class MyTree extends JFrame {
     protected JLabel my_infoNameText = new JLabel("File name: no file selected yet.");
     protected JLabel my_infoSizeText = new JLabel("File size: ...");
     protected JLabel my_infoEditedText = new JLabel("File last edited: ...");
+    protected JScrollPane paneTree;
 
     public static void main(String[] args) {
         new MyTree();
     }
 
     public MyTree() throws HeadlessException {
-        super("My Tree Test");
+        super("FileDude");
         listInit();
         myselectedfileinfo = "File name: no file selected yet";
         setSize(Toolkit.getDefaultToolkit().getScreenSize().width/2,Toolkit.getDefaultToolkit().getScreenSize().height/2);
@@ -84,15 +82,13 @@ public class MyTree extends JFrame {
         mytree.setEditable(false);
         mydisplay = new JTextField(32);
         mydisplay.setEditable(false);
-        Dimension d = new Dimension((int) (this.getWidth()*0.33),this.getHeight()-mydisplay.getWidth());
-        mytree.setPreferredSize(d);
         //WTF ENDS
-        mytree.setVisibleRowCount(10);
-        JScrollPane p = new JScrollPane(mytree);
 
-        p.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-        p.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-        add(p,BorderLayout.CENTER);
+        paneTree = new JScrollPane(mytree);
+        paneTree.setWheelScrollingEnabled(true);
+        paneTree.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+        paneTree.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        add(paneTree,BorderLayout.CENTER);
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
@@ -102,12 +98,16 @@ public class MyTree extends JFrame {
 
         myinfopanel = creteInfoPanel();
 //        setResizable(false);
-        panelLeft.add(p,BorderLayout.CENTER);
+        panelLeft.add(paneTree,BorderLayout.CENTER);
         panelLeft.add(mydisplay,BorderLayout.SOUTH);
         getContentPane().add(panelLeft,BorderLayout.WEST);
+
+        JScrollPane panelList = new JScrollPane(jList);
+        panelList.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+
         jList.setCellRenderer(new MyListCellRenderer());
         jList.addListSelectionListener(new MyListSelectionListener());
-        panelRight.add(jList,BorderLayout.CENTER);
+        panelRight.add(panelList,BorderLayout.CENTER);
         panelRight.add(myinfopanel,BorderLayout.SOUTH);
         getContentPane().add(panelRight,BorderLayout.CENTER);
         setVisible(true);
@@ -183,7 +183,6 @@ public class MyTree extends JFrame {
         public void treeExpanded(TreeExpansionEvent event) {
             final DefaultMutableTreeNode node = getTreeNode(event.getPath());
             final FileNode fnode = getFileNode(node);
-
             Thread runner = new Thread(){
               public void run(){
                   if (fnode!=null&&fnode.expand(node)) {
