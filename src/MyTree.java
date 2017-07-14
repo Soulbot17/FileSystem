@@ -5,9 +5,10 @@ import javax.swing.event.*;
 import javax.swing.filechooser.FileSystemView;
 import javax.swing.tree.*;
 import java.awt.*;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import java.awt.event.*;
 import java.io.File;
+import java.io.IOException;
+import java.net.URI;
 import java.text.SimpleDateFormat;
 import java.util.Vector;
 
@@ -15,10 +16,13 @@ import java.util.Vector;
  * Created by Soulbot17
  */
 /*
-@TODO:
--upper bar with delete folder / create folder
+@TODO NEW
+-delete listener; search engine;
+-optimize code, it's dirty as hell
 
-@BUGS:
+@TODO BUGS
+-need to refresh JTree after creating a folder
+-create / delete / explore folders when none folders selected
 
 */
 
@@ -27,6 +31,9 @@ public class MyTree extends JFrame {
     public static final ImageIcon FOLDER_ICON = new ImageIcon("src/iconset/folder24.png");
     public static final ImageIcon EXPENDED_ICON = new ImageIcon("src/iconset/expfolder24.png");
     public static final ImageIcon COMPUTER_ICON = new ImageIcon("src/iconset/computer24.png");
+    public static final ImageIcon FOLDERC_ICON = new ImageIcon("src/iconset/createfolder16.png");
+    public static final ImageIcon FOLDERD_ICON = new ImageIcon("src/iconset/deletefolder16.png");
+    public static final ImageIcon FOLDERB_ICON = new ImageIcon("src/iconset/browsefolder16.png");
 
     protected JPanel myinfopanel;
     protected JTree mytree;
@@ -42,6 +49,10 @@ public class MyTree extends JFrame {
     protected JLabel my_infoEditedText = new JLabel("File last edited: ...");
     protected JLabel my_infoPathText = new JLabel("File path: ...");
     protected JScrollPane paneTree;
+    protected JPanel panelNorth;
+    protected String currentFile = null;
+    protected String currentFolder = null;
+    DefaultMutableTreeNode currentNode = null;
 
     public static void main(String[] args) {
         new MyTree();
@@ -51,6 +62,7 @@ public class MyTree extends JFrame {
         super("FileDude");
         setSize(Toolkit.getDefaultToolkit().getScreenSize().width/2,Toolkit.getDefaultToolkit().getScreenSize().height/2);
         setLocationRelativeTo(null);
+
         DefaultMutableTreeNode top = new DefaultMutableTreeNode(new IconData(COMPUTER_ICON,null,"PC"));
 
         DefaultMutableTreeNode node;
@@ -73,6 +85,7 @@ public class MyTree extends JFrame {
 
         mytree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
         mytree.setShowsRootHandles(true);
+        mytree.addMouseListener(new MyTreeMouseListener());
         mytree.setEditable(false);
         mydisplay = new JTextField(32);
         mydisplay.setEditable(false);
@@ -98,19 +111,133 @@ public class MyTree extends JFrame {
 
         JScrollPane panelList = new JScrollPane(jList);
         panelList.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+        panelNorth = creteNorthPanel();
+        getContentPane().add(panelNorth,BorderLayout.NORTH);
 
         jList.setCellRenderer(new MyListCellRenderer());
         jList.addListSelectionListener(new MyListSelectionListener());
+        jList.addMouseListener(new MyListMouseAdapter());
         panelRight.add(panelList,BorderLayout.CENTER);
         panelRight.add(myinfopanel,BorderLayout.SOUTH);
         getContentPane().add(panelRight,BorderLayout.CENTER);
         setVisible(true);
     }
 
+    class MyTreeMouseListener extends MouseAdapter{
+        @Override
+        public void mouseReleased(MouseEvent e) {
+
+        }
+    }
+
+    protected JPanel creteNorthPanel(){
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel,BoxLayout.LINE_AXIS));
+        JButton createButton = new JButton(FOLDERC_ICON);
+        createButton.setBackground(this.getBackground());
+        createButton.setForeground(this.getForeground());
+        createButton.addActionListener(new MyCreateFolderFilstener());
+        JButton deleteButton = new JButton(FOLDERD_ICON);
+        JButton browseButton = new JButton(FOLDERB_ICON);
+        panel.add(createButton);
+        panel.add(deleteButton);
+        panel.add(browseButton);
+        browseButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Desktop desktop = Desktop.getDesktop();
+                File file = new File(currentFolder);
+                try {
+                    desktop.open(file);
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                }
+            }
+        });
+        return panel;
+    }
+
+    protected class MyCreateFolderFilstener implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            File file = null;
+            try {
+                file = new File(currentFolder);
+            } catch (NullPointerException c) {
+                mydisplay.setText("Select folder first");
+            }
+
+            if (file.isDirectory()&&file.canWrite()&&file!=null) {
+                String name = file.getAbsolutePath();
+                Font font = new Font(Font.DIALOG, Font.PLAIN, 16);
+                JFrame frame = new JFrame("New Folder");
+                frame.setSize(300, 100);
+                frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+                frame.setLocationRelativeTo(null);
+                frame.setLayout(new FlowLayout());
+                JTextField textName = new JTextField(14);
+                textName.setFont(font);
+                JButton button = new JButton(FOLDERC_ICON);
+                button.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        if (!textName.getText().equals("")) {
+                            File file = new File(name + "\\" + textName.getText());
+                            file.mkdir();
+                            System.out.println("created");
+                            FileNode fnode = getFileNode(currentNode);
+                            if (fnode != null) {
+                                mytreemodel.reload(currentNode); //??
+                                frame.setVisible(false);
+                            }
+                        }
+                    }
+                });
+
+
+                textName.addKeyListener(new KeyAdapter() {
+                    @Override
+                    public void keyPressed(KeyEvent e) {
+                        if (e.getKeyCode()==KeyEvent.VK_ENTER) {
+                            if (!textName.getText().equals("")) {
+                                File file = new File(name+"\\"+textName.getText());
+                                file.mkdir();
+                                System.out.println("created");
+                                mytreemodel.reload(currentNode);
+                                frame.setVisible(false);
+                            }
+                        }
+                    }
+                });
+                frame.add(textName);
+                frame.add(button);
+                frame.pack();
+                frame.setVisible(true);
+            } else mydisplay.setText("Can't write here");
+        }
+    }
+
+    protected class MyListMouseAdapter extends MouseAdapter{
+        Desktop desktop = Desktop.getDesktop();
+        @Override
+        public void mouseClicked(MouseEvent e) {
+            if (e.getClickCount()==2) {
+                try {
+                    desktop.open(new File(currentFile));
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                }
+            }
+        }
+    }
+
     protected class MyListSelectionListener implements ListSelectionListener {
+
+
         @Override
         public void valueChanged(ListSelectionEvent e) {
             if (e.getValueIsAdjusting()){
+                currentFile = jList.getSelectedValue().toString();
                 File file = new File(jList.getSelectedValue().toString());
                 myselectedfileinfo = getFileName(jList.getSelectedValue().toString());
                 String bytes = humanReadableByteCount(file.length(),true);
@@ -197,18 +324,24 @@ public class MyTree extends JFrame {
         public void treeCollapsed(TreeExpansionEvent event) {
         }
     }
-
+    /*
+    * clearInfoPanel();
+    *
+    *
+    *
+    * */
     class DirSelectionListener implements TreeSelectionListener{
         @Override
         public void valueChanged(TreeSelectionEvent e) {
             clearInfoPanel();
             DefaultMutableTreeNode node = getTreeNode(e.getPath());
+            currentNode = getTreeNode(e.getPath());
             FileNode fnode = getFileNode(node);
             Vector<File> vfiles = new Vector<>();
             if (fnode!=null) {
-                String tempo = fnode.getFile().getAbsolutePath();
-                mydisplay.setText(tempo);
-                File file = new File(tempo);
+                currentFolder = fnode.getFile().getAbsolutePath();
+                mydisplay.setText(currentFolder);
+                File file = new File(currentFolder);
                 File[] files = file.listFiles();
                 if (files!=null&&files.length>0) {
                     for (int i = 0; i<files.length;i++) {
