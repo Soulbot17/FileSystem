@@ -1,5 +1,3 @@
-import javafx.scene.control.RadioButton;
-
 import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.filechooser.FileSystemView;
@@ -8,7 +6,6 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
 import java.text.SimpleDateFormat;
 import java.util.Vector;
 
@@ -21,12 +18,10 @@ import java.util.Vector;
 -optimize code, it's dirty as hell
 
 @TODO BUGS
--need to refresh JTree after creating a folder
--create / delete / explore folders when none folders selected
-
+-need to refresh JTree after creating a folder. and deleting. it's a problem. my tree is stupid.
 */
 
-public class MyTree extends JFrame {
+public class FileBros extends JFrame {
     public static final ImageIcon DISK_ICON = new ImageIcon("src/iconset/disk24.png");
     public static final ImageIcon FOLDER_ICON = new ImageIcon("src/iconset/folder24.png");
     public static final ImageIcon EXPENDED_ICON = new ImageIcon("src/iconset/expfolder24.png");
@@ -48,6 +43,8 @@ public class MyTree extends JFrame {
     protected JLabel my_infoSizeText = new JLabel("File size: ...");
     protected JLabel my_infoEditedText = new JLabel("File last edited: ...");
     protected JLabel my_infoPathText = new JLabel("File path: ...");
+    protected JLabel my_infoIsHidden = new JLabel("File is hidden: ...");
+
     protected JScrollPane paneTree;
     protected JPanel panelNorth;
     protected String currentFile = null;
@@ -55,10 +52,10 @@ public class MyTree extends JFrame {
     DefaultMutableTreeNode currentNode = null;
 
     public static void main(String[] args) {
-        new MyTree();
+        new FileBros();
     }
 
-    public MyTree() throws HeadlessException {
+    public FileBros() throws HeadlessException {
         super("FileDude");
         setSize(Toolkit.getDefaultToolkit().getScreenSize().width/2,Toolkit.getDefaultToolkit().getScreenSize().height/2);
         setLocationRelativeTo(null);
@@ -74,6 +71,7 @@ public class MyTree extends JFrame {
         }
         mytreemodel = new DefaultTreeModel(top);
         mytree = new JTree(mytreemodel);
+        mytree.setIgnoreRepaint(true);
         //WTF
         mytree.putClientProperty("JTree.lineStyle","Aligned");
 
@@ -87,6 +85,7 @@ public class MyTree extends JFrame {
         mytree.setShowsRootHandles(true);
         mytree.addMouseListener(new MyTreeMouseListener());
         mytree.setEditable(false);
+
         mydisplay = new JTextField(32);
         mydisplay.setEditable(false);
         //WTF ENDS
@@ -95,7 +94,8 @@ public class MyTree extends JFrame {
         paneTree.setWheelScrollingEnabled(true);
         paneTree.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
         paneTree.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-        add(paneTree,BorderLayout.CENTER);
+
+        add(paneTree,BorderLayout.WEST);
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
@@ -103,7 +103,7 @@ public class MyTree extends JFrame {
             }
         });
 
-        myinfopanel = creteInfoPanel();
+        myinfopanel = createInfoPanel();
 //        setResizable(false);
         panelLeft.add(paneTree,BorderLayout.CENTER);
         panelLeft.add(mydisplay,BorderLayout.SOUTH);
@@ -145,6 +145,7 @@ public class MyTree extends JFrame {
         browseButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                if (currentFolder==null||currentFolder.equals("")) return;
                 Desktop desktop = Desktop.getDesktop();
                 File file = new File(currentFolder);
                 try {
@@ -160,6 +161,7 @@ public class MyTree extends JFrame {
     protected class MyCreateFolderFilstener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
+        if (currentFolder==null||currentFolder.equals("")) return;
             File file = null;
             try {
                 file = new File(currentFolder);
@@ -246,6 +248,7 @@ public class MyTree extends JFrame {
                 SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy, HH:mm:ss");
                 my_infoEditedText.setText(String.format("File last edited: %s",sdf.format(file.lastModified())));
                 my_infoPathText.setText("File path: "+file.getAbsolutePath());
+                my_infoIsHidden.setText(String.format("File is hidden: %s",file.isHidden()==true ? "yes" : "no"));
             }
         }
 
@@ -258,10 +261,10 @@ public class MyTree extends JFrame {
         }
     }
 
-    protected JPanel creteInfoPanel(){
+    protected JPanel createInfoPanel(){
         JPanel panel = new JPanel();
         Font font = new Font(Font.SANS_SERIF,Font.PLAIN,12);
-        panel.setLayout(new BoxLayout(panel,BoxLayout.Y_AXIS));
+        panel.setLayout(new BoxLayout(panel,BoxLayout.PAGE_AXIS));
         panel.setFocusable(false);
         panel.setBorder(BorderFactory.createEtchedBorder());
         my_infoNameText.setFont(font);
@@ -269,6 +272,8 @@ public class MyTree extends JFrame {
         my_infoSizeText.setFont(font);
         panel.add(my_infoSizeText);
         my_infoEditedText.setFont(font);
+        my_infoIsHidden.setFont(font);
+        panel.add(my_infoIsHidden);
         panel.add(my_infoEditedText);
         my_infoPathText.setFont(font);
         panel.add(my_infoPathText);
@@ -340,7 +345,14 @@ public class MyTree extends JFrame {
             Vector<File> vfiles = new Vector<>();
             if (fnode!=null) {
                 currentFolder = fnode.getFile().getAbsolutePath();
-                mydisplay.setText(currentFolder);
+//                mydisplay.setText(currentFolder);
+                if (currentFolder==null) return;
+                SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy, HH:mm:ss");
+                try {
+                    mydisplay.setText("Files: "+String.valueOf(fnode.getFile().listFiles().length)+" | Last modified: "+sdf.format(fnode.getFile().lastModified()));
+                } catch (NullPointerException g) {
+                    mydisplay.setText("");
+                }
                 File file = new File(currentFolder);
                 File[] files = file.listFiles();
                 if (files!=null&&files.length>0) {
@@ -360,6 +372,7 @@ public class MyTree extends JFrame {
         my_infoSizeText.setText("File size: ...");
         my_infoEditedText.setText("File last edited: ...");
         my_infoPathText.setText("File path: ...");
+        my_infoIsHidden.setText("File is hidden: ...");
     };
 
     class IconCellRenderer extends JLabel implements TreeCellRenderer{
@@ -472,7 +485,7 @@ public class MyTree extends JFrame {
             }
             for (int i = 0; i<v.size();i++) {
                 FileNode nd = (FileNode) v.elementAt(i);
-                IconData data = new IconData(MyTree.FOLDER_ICON,MyTree.EXPENDED_ICON,nd);
+                IconData data = new IconData(FileBros.FOLDER_ICON, FileBros.EXPENDED_ICON,nd);
                 DefaultMutableTreeNode node = new DefaultMutableTreeNode(data);
                 parent.add(node);
 
