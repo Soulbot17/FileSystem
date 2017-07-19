@@ -1,4 +1,8 @@
+package main.java.ru.donkot.FileBros;
+import org.apache.commons.io.FileUtils;
+
 import javax.swing.*;
+import javax.swing.border.LineBorder;
 import javax.swing.event.*;
 import javax.swing.filechooser.FileSystemView;
 import javax.swing.tree.*;
@@ -18,18 +22,19 @@ import java.util.Vector;
 -REFACTOR. I need fucking JFrame to call
 
 @TODO BUGS
+-lock jtree size
 */
 
 public class FileBros extends JFrame {
 
-    private static final ImageIcon DISK_ICON = new ImageIcon("src/iconset/disk24.png");
-    private static final ImageIcon FOLDER_ICON = new ImageIcon("src/iconset/folder24.png");
-    private static final ImageIcon EXPENDED_ICON = new ImageIcon("src/iconset/expfolder24.png");
-    private static final ImageIcon COMPUTER_ICON = new ImageIcon("src/iconset/computer24.png");
-    private static final ImageIcon FOLDERC_ICON = new ImageIcon("src/iconset/createfolder16.png");
-    private static final ImageIcon FOLDERD_ICON = new ImageIcon("src/iconset/deletefolder16.png");
-    private static final ImageIcon FOLDERB_ICON = new ImageIcon("src/iconset/browsefolder16.png");
-    private static final ImageIcon REFRESH_ICON = new ImageIcon("src/iconset/refresh16.png");
+    private static final ImageIcon DISK_ICON = new ImageIcon("src/main/java/ru/donkot/FileBros/iconset/disk24.png");
+    private static final ImageIcon FOLDER_ICON = new ImageIcon("src/main/java/ru/donkot/FileBros/iconset/folder24.png");
+    private static final ImageIcon EXPENDED_ICON = new ImageIcon("src/main/java/ru/donkot/FileBros/iconset/expfolder24.png");
+    private static final ImageIcon COMPUTER_ICON = new ImageIcon("src/main/java/ru/donkot/FileBros/iconset/computer24.png");
+    private static final ImageIcon FOLDERC_ICON = new ImageIcon("src/main/java/ru/donkot/FileBros/iconset/createfolder16.png");
+    private static final ImageIcon FOLDERD_ICON = new ImageIcon("src/main/java/ru/donkot/FileBros/iconset/deletefolder16.png");
+    private static final ImageIcon FOLDERB_ICON = new ImageIcon("src/main/java/ru/donkot/FileBros/iconset/browsefolder16.png");
+    private static final ImageIcon REFRESH_ICON = new ImageIcon("src/main/java/ru/donkot/FileBros/iconset/refresh16.png");
 
     private JPanel myinfopanel;
     private JTree mytree;
@@ -62,7 +67,6 @@ public class FileBros extends JFrame {
         super("FileDude");
         setSize(Toolkit.getDefaultToolkit().getScreenSize().width/2,Toolkit.getDefaultToolkit().getScreenSize().height/2);
         setLocationRelativeTo(null);
-
         DefaultMutableTreeNode top = new DefaultMutableTreeNode(new IconData(COMPUTER_ICON,null,"PC"));
 
         DefaultMutableTreeNode node;
@@ -75,7 +79,7 @@ public class FileBros extends JFrame {
         mytreemodel = new DefaultTreeModel(top);
         mytree = new JTree(mytreemodel);
         mytree.setIgnoreRepaint(true);
-        //WTF
+
         mytree.putClientProperty("JTree.lineStyle","Aligned");
 
         TreeCellRenderer renderer = new IconCellRenderer();
@@ -87,21 +91,20 @@ public class FileBros extends JFrame {
         mytree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
         mytree.setShowsRootHandles(true);
         mytree.setEditable(false);
-
         mydisplay = new JTextField(32);
         mydisplay.setEditable(false);
-        //WTF ENDS
 
         paneTree = new JScrollPane(mytree);
         paneTree.setWheelScrollingEnabled(true);
         paneTree.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
         paneTree.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 
-        add(paneTree,BorderLayout.WEST);
+//        add(paneTree,BorderLayout.WEST);
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
-                System.exit(0);
+                    System.exit(0);
+
             }
         });
 
@@ -130,24 +133,13 @@ public class FileBros extends JFrame {
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel,BoxLayout.X_AXIS));
         JButton createButton = new JButton(FOLDERC_ICON);
-        createButton.setBackground(this.getBackground());
-        createButton.setForeground(this.getForeground());
+        createButton.setText("Create folder");
         createButton.addActionListener(new MyCreateFolderFilstener());
         JButton deleteButton = new JButton(FOLDERD_ICON);
-        JButton browseButton = new JButton(FOLDERB_ICON);
-        JButton refreshButton = new JButton(REFRESH_ICON);
-        refreshButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                new FileBros();
-                dispose();
-            }
-        });
+        deleteButton.setText("Delete fodler");
         deleteButton.addActionListener(new MyDeleteFolderFilstener());
-        panel.add(createButton);
-        panel.add(deleteButton);
-        panel.add(browseButton);
-        panel.add(refreshButton);
+        JButton browseButton = new JButton(FOLDERB_ICON);
+        browseButton.setText("Browse folder");
         browseButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -161,6 +153,21 @@ public class FileBros extends JFrame {
                 }
             }
         });
+        JButton refreshButton = new JButton(REFRESH_ICON);
+        refreshButton.setText("Refresh");
+        refreshButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                new FileBros();
+                dispose();
+            }
+        });
+
+        panel.add(createButton);
+        panel.add(deleteButton);
+        panel.add(browseButton);
+        panel.add(refreshButton);
+
         return panel;
     }
 
@@ -173,17 +180,23 @@ public class FileBros extends JFrame {
                 if (currentFolder.equals(r.getAbsolutePath())) return;
             }
             File file = new File(currentFolder);
-
             if (file.canWrite()==false) return;
             int reply = JOptionPane.showConfirmDialog(null, "Delete this folder?", "", JOptionPane.YES_NO_OPTION);
             if (reply == JOptionPane.YES_OPTION) {
-                    if (file.isDirectory()) {
+                //          deleting without apache FileUtil class
+                    /*if (file.isDirectory()) {
                         for (File c : file.listFiles())
                             c.delete();
                     }
                     if (!file.delete()) {
                         mydisplay.setText("Can't delete this folder");
-                    } else file.delete();
+                    } else file.delete();*/
+                try {
+                    //      with apache delete
+                    FileUtils.deleteDirectory(file);
+                } catch (IOException e1) {
+                    mydisplay.setText("Can't delete this directory");
+                }
                 DefaultTreeModel model = (DefaultTreeModel) mytree.getModel();
                 model.removeNodeFromParent(currentNode);
                 model.reload(currentNode.getNextNode());
@@ -474,6 +487,7 @@ public class FileBros extends JFrame {
         }
     }
 
+
     class FileNode {
         protected File my_file;
 
@@ -561,6 +575,7 @@ public class FileBros extends JFrame {
         }
     }
 
+
     class IconData {
         protected Icon n_icon;
         protected Icon n_expanded;
@@ -595,11 +610,14 @@ public class FileBros extends JFrame {
         }
     }
 
+
+    //          get name from path
     protected String getFileName(String filepath){
         String fileName = filepath.substring(filepath.lastIndexOf("\\")+1,filepath.length());
         return fileName;
     }
 
+    //          system view for my file list
     class MyListCellRenderer extends DefaultListCellRenderer {
         @Override
         public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
