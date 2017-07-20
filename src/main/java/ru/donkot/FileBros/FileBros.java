@@ -14,14 +14,12 @@ import java.util.Vector;
 
 /**
  * Created by Soulbot17
+ * Trial assignment for SPLAT
  */
 /*
 @TODO NEW
--optimize code, it's dirty as hell
--REFACTOR. I need fucking JFrame to call
 
 @TODO BUGS
--lock jtree size
 */
 
 public class FileBros extends JFrame {
@@ -34,7 +32,6 @@ public class FileBros extends JFrame {
     private static final ImageIcon FOLDERD_ICON = new ImageIcon("src/main/java/ru/donkot/FileBros/iconset/deletefolder16.png");
     private static final ImageIcon FOLDERB_ICON = new ImageIcon("src/main/java/ru/donkot/FileBros/iconset/browsefolder16.png");
     private static final ImageIcon REFRESH_ICON = new ImageIcon("src/main/java/ru/donkot/FileBros/iconset/refresh16.png");
-    private static final ImageIcon FOLDERI_ICON = new ImageIcon("src/main/java/ru/donkot/FileBros/iconset/folderinfo16.png");
 
     private JPanel myinfopanel;
     private JTree mytree;
@@ -165,13 +162,9 @@ public class FileBros extends JFrame {
                 dispose();
             }
         });
-        /*JButton infoButton = new JButton(FOLDERI_ICON);
-        infoButton.setText("Folder info");
-        infoButton.setFont(font);*/
 
         panel.add(createButton);
         panel.add(deleteButton);
-//        panel.add(infoButton);
         panel.add(browseButton);
         panel.add(refreshButton);
 
@@ -190,7 +183,7 @@ public class FileBros extends JFrame {
             if (file.canWrite()==false) return;
             int reply = JOptionPane.showConfirmDialog(null, "Delete this folder?", "", JOptionPane.YES_NO_OPTION);
             if (reply == JOptionPane.YES_OPTION) {
-                //          deleting without apache FileUtil class
+                //          deleting without apache FileUtil class. It not works well
                     /*if (file.isDirectory()) {
                         for (File c : file.listFiles())
                             c.delete();
