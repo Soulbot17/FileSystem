@@ -9,7 +9,6 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.FileSystem;
 import java.text.SimpleDateFormat;
 import java.util.Vector;
 
@@ -150,7 +149,9 @@ public class FileBros extends JFrame {
                 try {
                     desktop.open(file);
                 } catch (IOException e1) {
-                    e1.printStackTrace();
+                    mydisplay.setText("Can't browse this folder");
+                } catch (IllegalArgumentException c) {
+                    mydisplay.setText("Can't browse this folder");
                 }
             }
         });
