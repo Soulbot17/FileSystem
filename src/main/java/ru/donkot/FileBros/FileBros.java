@@ -33,23 +33,17 @@ public class FileBros extends JFrame {
     private static final ImageIcon FOLDERB_ICON = new ImageIcon("src/main/java/ru/donkot/FileBros/iconset/browsefolder16.png");
     private static final ImageIcon REFRESH_ICON = new ImageIcon("src/main/java/ru/donkot/FileBros/iconset/refresh16.png");
 
-    private JPanel myinfopanel;
     private JTree mytree;
     private JTextField mydisplay;
     private DefaultTreeModel mytreemodel;
-    private JPanel panelLeft = new JPanel(new BorderLayout());
-    private JPanel panelRight = new JPanel(new BorderLayout());
     private JList jList = new JList();
     private Vector nullvector = new Vector();
-    private String myselectedfileinfo;
     private JLabel my_infoNameText = new JLabel("File name: no file selected yet.");
     private JLabel my_infoSizeText = new JLabel("File size: ...");
     private JLabel my_infoEditedText = new JLabel("File last edited: ...");
     private JLabel my_infoPathText = new JLabel("File path: ...");
     private JLabel my_infoIsHidden = new JLabel("File is hidden: ...");
 
-    private JScrollPane paneTree;
-    private JPanel panelNorth;
     private String currentFile = null;
     private String currentFolder = null;
     private DefaultMutableTreeNode currentNode = null;
@@ -70,10 +64,10 @@ public class FileBros extends JFrame {
 
         DefaultMutableTreeNode node;
         File[] list = File.listRoots();
-        for (int i = 0; i<list.length;i++) {
-            node = new DefaultMutableTreeNode(new IconData(DISK_ICON,null,new FileNode(list[i])));
+        for (File aList : list) {
+            node = new DefaultMutableTreeNode(new IconData(DISK_ICON, null, new FileNode(aList)));
             top.add(node);
-            node.add(new DefaultMutableTreeNode(new Boolean(true)));
+            node.add(new DefaultMutableTreeNode(Boolean.TRUE));
         }
         mytreemodel = new DefaultTreeModel(top);
         mytree = new JTree(mytreemodel);
@@ -89,7 +83,7 @@ public class FileBros extends JFrame {
         mydisplay = new JTextField(32);
         mydisplay.setEditable(false);
 
-        paneTree = new JScrollPane(mytree);
+        JScrollPane paneTree = new JScrollPane(mytree);
         paneTree.setWheelScrollingEnabled(true);
         paneTree.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
         paneTree.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
@@ -102,19 +96,21 @@ public class FileBros extends JFrame {
             }
         });
 
-        myinfopanel = createInfoPanel();
+        JPanel myinfopanel = createInfoPanel();
+        JPanel panelLeft = new JPanel(new BorderLayout());
         panelLeft.add(paneTree,BorderLayout.CENTER);
         panelLeft.add(mydisplay,BorderLayout.SOUTH);
         getContentPane().add(panelLeft,BorderLayout.WEST);
 
         JScrollPane panelList = new JScrollPane(jList);
         panelList.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-        panelNorth = creteNorthPanel();
+        JPanel panelNorth = creteNorthPanel();
         getContentPane().add(panelNorth,BorderLayout.NORTH);
 
         jList.setCellRenderer(new MyListCellRenderer());
         jList.addListSelectionListener(new MyListSelectionListener());
         jList.addMouseListener(new MyListMouseAdapter());
+        JPanel panelRight = new JPanel(new BorderLayout());
         panelRight.add(panelList,BorderLayout.CENTER);
         panelRight.add(myinfopanel,BorderLayout.SOUTH);
         getContentPane().add(panelRight,BorderLayout.CENTER);
@@ -122,7 +118,7 @@ public class FileBros extends JFrame {
     }
 
     //          north panel with create/delete etc. buttons
-    protected JPanel creteNorthPanel(){
+    private JPanel creteNorthPanel(){
         JPanel panel = new JPanel();
         Font font = new Font(Font.DIALOG,Font.BOLD,12);
         panel.setLayout(new BoxLayout(panel,BoxLayout.X_AXIS));
@@ -145,9 +141,7 @@ public class FileBros extends JFrame {
                 File file = new File(currentFolder);
                 try {
                     desktop.open(file);
-                } catch (IOException e1) {
-                    mydisplay.setText("Can't browse this folder");
-                } catch (IllegalArgumentException c) {
+                } catch (IOException | IllegalArgumentException e1) {
                     mydisplay.setText("Can't browse this folder");
                 }
             }
@@ -180,7 +174,7 @@ public class FileBros extends JFrame {
                 if (currentFolder.equals(r.getAbsolutePath())) return;
             }
             File file = new File(currentFolder);
-            if (file.canWrite()==false) return;
+            if (!file.canWrite()) return;
             int reply = JOptionPane.showConfirmDialog(null, "Delete this folder?", "", JOptionPane.YES_NO_OPTION);
             if (reply == JOptionPane.YES_OPTION) {
                 //          deleting without apache FileUtil class. It not works well
@@ -240,7 +234,7 @@ public class FileBros extends JFrame {
             void createFile() {
                 if (!textFileName.getText().equals("")) {
                     File file = new File(currentFolder + "\\" + textFileName.getText());
-                    if (file.mkdir()==false) {
+                    if (!file.mkdir()) {
                         mydisplay.setText("Can't create folder here");
                     } else file.mkdir();
                     System.out.println("created");
@@ -292,19 +286,19 @@ public class FileBros extends JFrame {
             if (e.getValueIsAdjusting()){
                 currentFile = jList.getSelectedValue().toString();
                 File file = new File(jList.getSelectedValue().toString());
-                myselectedfileinfo = getFileName(jList.getSelectedValue().toString());
+                String myselectedfileinfo = getFileName(jList.getSelectedValue().toString());
                 String bytes = humanReadableByteCount(file.length(),true);
-                my_infoNameText.setText(String.format("File name: %s",myselectedfileinfo));
+                my_infoNameText.setText(String.format("File name: %s", myselectedfileinfo));
                 my_infoSizeText.setText(String.format("File size: %s",bytes));
                 SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy, HH:mm:ss");
                 my_infoEditedText.setText(String.format("File last edited: %s",sdf.format(file.lastModified())));
                 my_infoPathText.setText("File path: "+file.getAbsolutePath());
-                my_infoIsHidden.setText(String.format("File is hidden: %s",file.isHidden()==true ? "yes" : "no"));
+                my_infoIsHidden.setText(String.format("File is hidden: %s", file.isHidden() ? "yes" : "no"));
             }
         }
 
         //          stolen awesome method to display readable byte
-        public String humanReadableByteCount(long bytes, boolean si) {
+        String humanReadableByteCount(long bytes, boolean si) {
             int unit = si ? 1000 : 1024;
             if (bytes < unit) return bytes + " B";
             int exp = (int) (Math.log(bytes) / Math.log(unit));
@@ -314,7 +308,7 @@ public class FileBros extends JFrame {
     }
 
     //          panel with information about files
-    protected JPanel createInfoPanel(){
+    private JPanel createInfoPanel(){
         JPanel panel = new JPanel();
         Font font = new Font(Font.SANS_SERIF,Font.PLAIN,12);
         panel.setLayout(new BoxLayout(panel,BoxLayout.PAGE_AXIS));
@@ -334,12 +328,12 @@ public class FileBros extends JFrame {
     }
 
     //          get TreeNode from path
-    DefaultMutableTreeNode getTreeNode(TreePath path) {
+    private DefaultMutableTreeNode getTreeNode(TreePath path) {
         return (DefaultMutableTreeNode) path.getLastPathComponent();
     }
 
     //          get FileNode from TreeNode
-    FileNode getFileNode(DefaultMutableTreeNode node) {
+    private FileNode getFileNode(DefaultMutableTreeNode node) {
         if (node==null) return null;
         Object obj = node.getUserObject();
         if (obj instanceof IconData) {
@@ -395,7 +389,6 @@ public class FileBros extends JFrame {
             Vector<File> vfiles = new Vector<>();
             if (fnode!=null) {
                 currentFolder = fnode.getFile().getAbsolutePath();
-                if (currentFolder==null) return;
                 SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy, HH:mm:ss");
                 try {
 //                    mydisplay.setText("Files: "+String.valueOf(fnode.getFile().listFiles().length)+" | Last modified: "+sdf.format(fnode.getFile().lastModified()));
@@ -406,10 +399,10 @@ public class FileBros extends JFrame {
                 File file = new File(currentFolder);
                 File[] files = file.listFiles();
                 if (files!=null&&files.length>0) {
-                    for (int i = 0; i<files.length;i++) {
-                        if (!files[i].isDirectory()) {
-                            vfiles.add(files[i]);
-                        } else continue;
+                    for (File file1 : files) {
+                        if (!file1.isDirectory()) {
+                            vfiles.add(file1);
+                        }
                     }
                     jList.setListData(vfiles);
                 } else jList.setListData(nullvector);
@@ -417,7 +410,7 @@ public class FileBros extends JFrame {
         }
     }
 
-    protected void clearInfoPanel(){
+    private void clearInfoPanel(){
         my_infoNameText.setText("File name: no file selected yet.");
         my_infoSizeText.setText("File size: ...");
         my_infoEditedText.setText("File last edited: ...");
@@ -427,13 +420,13 @@ public class FileBros extends JFrame {
 
     //          nice icons for my JTree
     class IconCellRenderer extends JLabel implements TreeCellRenderer{
-        protected Color my_textSelectionColor;
-        protected Color my_textNonSelectedColor;
-        protected Color my_bkSelectedColor;
-        protected Color my_bkNonSelectedColor;
-        protected Color my_borderSelectedColor;
+        Color my_textSelectionColor;
+        Color my_textNonSelectedColor;
+        Color my_bkSelectedColor;
+        Color my_bkNonSelectedColor;
+        Color my_borderSelectedColor;
 
-        protected boolean my_selected;
+        boolean my_selected;
 
         public IconCellRenderer() {
             super();
@@ -488,13 +481,13 @@ public class FileBros extends JFrame {
 
 
     class FileNode {
-        protected File my_file;
+        File my_file;
 
         public FileNode(File my_file) {
             this.my_file = my_file;
         }
 
-        public File getFile() {
+        File getFile() {
             return my_file;
         }
 
@@ -503,7 +496,7 @@ public class FileBros extends JFrame {
             return my_file.getName().length() > 0 ? my_file.getName() : my_file.getPath();
         }
 
-        public boolean expand (DefaultMutableTreeNode parent) {
+        boolean expand(DefaultMutableTreeNode parent) {
             DefaultMutableTreeNode flag = (DefaultMutableTreeNode) parent.getFirstChild();
             if (flag==null) { //no flag
                 return false;
@@ -518,16 +511,15 @@ public class FileBros extends JFrame {
             if (files==null) return true;
 
             Vector v = new Vector();
-            for (int m = 0; m<files.length;m++) {
-                File f = files[m];
+            for (File f : files) {
                 if (!(f.isDirectory())) continue;
 
                 FileNode fnode = new FileNode(f);
                 boolean isAdded = false;
-                for (int i = 0; i<v.size();i++) {
+                for (int i = 0; i < v.size(); i++) {
                     FileNode nd = (FileNode) v.elementAt(i);
-                    if (fnode.compareTo(nd)<0) {
-                        v.insertElementAt(fnode,i);
+                    if (fnode.compareTo(nd) < 0) {
+                        v.insertElementAt(fnode, i);
                         isAdded = true;
                         break;
                     }
@@ -543,30 +535,30 @@ public class FileBros extends JFrame {
                 parent.add(node);
 
                 if (nd.hasSubDirs()) {
-                    node.add(new DefaultMutableTreeNode(new Boolean(true)));
+                    node.add(new DefaultMutableTreeNode(Boolean.TRUE));
                 }
             }
             return true;
         }
 
-        protected boolean hasSubDirs() {
+        boolean hasSubDirs() {
             File[] files = listFiles();
             if (files==null) {
                 return false;
             }
-            for (int m = 0; m<files.length;m++) {
-                if (files[m].isDirectory()) {
+            for (File file : files) {
+                if (file.isDirectory()) {
                     return true;
                 }
             }
             return false;
         }
 
-        protected int compareTo(FileNode toCompare) {
+        int compareTo(FileNode toCompare) {
             return my_file.getName().compareToIgnoreCase(toCompare.my_file.getName());
         }
 
-        protected File[] listFiles() {
+        File[] listFiles() {
             if (!my_file.isDirectory()) {
                 return null;
             }
@@ -576,9 +568,9 @@ public class FileBros extends JFrame {
 
 
     class IconData {
-        protected Icon n_icon;
-        protected Icon n_expanded;
-        protected Object n_data;
+        Icon n_icon;
+        Icon n_expanded;
+        Object n_data;
 
         public IconData(Icon n_icon, Icon n_expanded, Object n_data) {
             this.n_icon = n_icon;
