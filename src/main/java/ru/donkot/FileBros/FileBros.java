@@ -1,7 +1,9 @@
-package main.java.ru.donkot.FileBros;
+package ru.donkot.FileBros;
 import org.apache.commons.io.FileUtils;
+import sun.reflect.generics.tree.Tree;
 
 import javax.swing.*;
+import javax.swing.border.LineBorder;
 import javax.swing.event.*;
 import javax.swing.filechooser.FileSystemView;
 import javax.swing.tree.*;
@@ -10,6 +12,8 @@ import java.awt.event.*;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.HashMap;
+import java.util.TreeMap;
 import java.util.Vector;
 
 /**
@@ -24,6 +28,8 @@ import java.util.Vector;
 
 public class FileBros extends JFrame {
 
+    private final boolean additionaltask = false; // set "true" to enable lazy loading
+
     private static final ImageIcon DISK_ICON = new ImageIcon("src/main/java/ru/donkot/FileBros/iconset/disk24.png");
     private static final ImageIcon FOLDER_ICON = new ImageIcon("src/main/java/ru/donkot/FileBros/iconset/folder24.png");
     private static final ImageIcon EXPENDED_ICON = new ImageIcon("src/main/java/ru/donkot/FileBros/iconset/expfolder24.png");
@@ -32,18 +38,22 @@ public class FileBros extends JFrame {
     private static final ImageIcon FOLDERD_ICON = new ImageIcon("src/main/java/ru/donkot/FileBros/iconset/deletefolder16.png");
     private static final ImageIcon FOLDERB_ICON = new ImageIcon("src/main/java/ru/donkot/FileBros/iconset/browsefolder16.png");
     private static final ImageIcon REFRESH_ICON = new ImageIcon("src/main/java/ru/donkot/FileBros/iconset/refresh16.png");
+    private static final ImageIcon TITLE_ICON = new ImageIcon("src/main/java/ru/donkot/FileBros/iconset/progicon.png");
+    private static final ImageIcon SEARCH_ICON = new ImageIcon("src/main/java/ru/donkot/FileBros/iconset/search-icon.png");
+    private static final ImageIcon HISTORY_ICON = new ImageIcon("src/main/java/ru/donkot/FileBros/iconset/history-icon.png");
 
-    private JTree mytree;
+    private JTree my_folderTree;
     private JTextField mydisplay;
     private DefaultTreeModel mytreemodel;
-    private JList jList = new JList();
+    private JList my_fileList = new JList();
     private Vector nullvector = new Vector();
     private JLabel my_infoNameText = new JLabel("File name: no file selected yet.");
     private JLabel my_infoSizeText = new JLabel("File size: ...");
     private JLabel my_infoEditedText = new JLabel("File last edited: ...");
     private JLabel my_infoPathText = new JLabel("File path: ...");
     private JLabel my_infoIsHidden = new JLabel("File is hidden: ...");
-
+    private JTextField my_textFind;
+    Vector<File> my_history = new Vector<>(); // storing searched filed
     private String currentFile = null;
     private String currentFolder = null;
     private DefaultMutableTreeNode currentNode = null;
@@ -56,8 +66,7 @@ public class FileBros extends JFrame {
     //          my constructor
     public FileBros() throws HeadlessException {
         super("FileDude");
-        Image image = Toolkit.getDefaultToolkit().createImage(getClass().getResource("progicon.png"));
-        setIconImage(image);
+        setIconImage(TITLE_ICON.getImage());
         setSize(Toolkit.getDefaultToolkit().getScreenSize().width/2,Toolkit.getDefaultToolkit().getScreenSize().height/2);
         setLocationRelativeTo(null);
         DefaultMutableTreeNode top = new DefaultMutableTreeNode(new IconData(COMPUTER_ICON,null,"PC"));
@@ -70,20 +79,20 @@ public class FileBros extends JFrame {
             node.add(new DefaultMutableTreeNode(Boolean.TRUE));
         }
         mytreemodel = new DefaultTreeModel(top);
-        mytree = new JTree(mytreemodel);
-        mytree.setIgnoreRepaint(true);
-        mytree.putClientProperty("JTree.lineStyle","Aligned");
+        my_folderTree = new JTree(mytreemodel);
+        my_folderTree.setIgnoreRepaint(true);
+        my_folderTree.putClientProperty("JTree.lineStyle","Aligned");
         TreeCellRenderer renderer = new IconCellRenderer();
-        mytree.setCellRenderer(renderer);
-        mytree.addTreeSelectionListener(new DirSelectionListener());
-        mytree.addTreeExpansionListener(new DirExpansionListener());
-        mytree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
-        mytree.setShowsRootHandles(true);
-        mytree.setEditable(false);
+        my_folderTree.setCellRenderer(renderer);
+        my_folderTree.addTreeSelectionListener(new DirSelectionListener());
+        my_folderTree.addTreeExpansionListener(new DirExpansionListener());
+        my_folderTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
+        my_folderTree.setShowsRootHandles(true);
+        my_folderTree.setEditable(false);
         mydisplay = new JTextField(32);
         mydisplay.setEditable(false);
 
-        JScrollPane paneTree = new JScrollPane(mytree);
+        JScrollPane paneTree = new JScrollPane(my_folderTree);
         paneTree.setWheelScrollingEnabled(true);
         paneTree.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
         paneTree.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
@@ -102,14 +111,14 @@ public class FileBros extends JFrame {
         panelLeft.add(mydisplay,BorderLayout.SOUTH);
         getContentPane().add(panelLeft,BorderLayout.WEST);
 
-        JScrollPane panelList = new JScrollPane(jList);
+        JScrollPane panelList = new JScrollPane(my_fileList);
         panelList.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
         JPanel panelNorth = creteNorthPanel();
         getContentPane().add(panelNorth,BorderLayout.NORTH);
 
-        jList.setCellRenderer(new MyListCellRenderer());
-        jList.addListSelectionListener(new MyListSelectionListener());
-        jList.addMouseListener(new MyListMouseAdapter());
+        my_fileList.setCellRenderer(new MyListCellRenderer());
+        my_fileList.addListSelectionListener(new MyListSelectionListener());
+        my_fileList.addMouseListener(new MyListMouseAdapter());
         JPanel panelRight = new JPanel(new BorderLayout());
         panelRight.add(panelList,BorderLayout.CENTER);
         panelRight.add(myinfopanel,BorderLayout.SOUTH);
@@ -162,7 +171,74 @@ public class FileBros extends JFrame {
         panel.add(browseButton);
         panel.add(refreshButton);
 
+        //          right panel with search and history
+        JPanel panelCon = new JPanel(new BorderLayout());
+        JPanel panelFind = new JPanel();
+        panelFind.setLayout(new BoxLayout(panelFind,BoxLayout.X_AXIS));
+        Font findFont = new Font(Font.DIALOG,Font.PLAIN,15);
+        my_textFind = new JTextField(12);
+        my_textFind.setFont(findFont);
+        my_textFind.setBorder(new LineBorder(Color.DARK_GRAY));
+        JButton searchButton = new JButton(SEARCH_ICON);
+        searchButton.setText("Search");
+        searchButton.setFont(font);
+        JButton historyButton = new JButton(HISTORY_ICON);
+        historyButton.setFont(font);
+        historyButton.setText("History");
+        historyButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                my_fileList.setListData(my_history);
+            }
+        });
+        searchButton.addActionListener(new MyFindListener());
+        panelFind.add(my_textFind);
+        panelFind.add(searchButton);
+        panelFind.add(historyButton);
+        panelCon.add(panelFind,BorderLayout.EAST);
+        panel.add(panelCon);
+
         return panel;
+    }
+    //          find button activity
+    protected class MyFindListener implements ActionListener {
+        Vector<File> fdata = new Vector<>(); //
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            fdata = new Vector<>();
+            my_fileList.removeAll();
+            find(currentFolder,my_textFind.getText());
+            my_textFind.setText("");
+            for (File s : fdata) {
+                my_history.add(s);
+            }
+        }
+
+        void find(String path, String find) {
+            try {
+                File f = new File(path);
+                String[] list = f.list();//     file list
+                if (list.length<1) return;
+                for (String file : list) {      //проверка на совпадение
+                    if (find.equals(file)) {
+                        fdata.add(new File(path,file));;
+                    }
+                    if (!path.endsWith("\\")) {
+                        path += "\\";
+                    }
+                    File tempfile = new File(path, file);
+                    if (!file.equals(".") && !file.equals("..")) {        //!!!
+                        if (tempfile.isDirectory()) {      //иначе проверяем, если это папка
+                            find(path + file, find);               //то рекурсивный вызов этой функции
+                        }
+                    }
+                }
+                my_fileList.setListData(fdata);
+            } catch (NullPointerException c) {
+                mydisplay.setText("Can't search here");
+            }
+
+        }
     }
 
     protected class MyDeleteFolderFilstener implements ActionListener {
@@ -191,7 +267,7 @@ public class FileBros extends JFrame {
                 } catch (IOException e1) {
                     mydisplay.setText("Can't delete this directory");
                 }
-                DefaultTreeModel model = (DefaultTreeModel) mytree.getModel();
+                DefaultTreeModel model = (DefaultTreeModel) my_folderTree.getModel();
                 model.removeNodeFromParent(currentNode);
                 model.reload(currentNode.getNextNode());
             }
@@ -239,8 +315,8 @@ public class FileBros extends JFrame {
                     } else file.mkdir();
                     System.out.println("created");
 
-                    DefaultMutableTreeNode node = (DefaultMutableTreeNode) mytree.getLastSelectedPathComponent();
-                    DefaultTreeModel model = (DefaultTreeModel) mytree.getModel();
+                    DefaultMutableTreeNode node = (DefaultMutableTreeNode) my_folderTree.getLastSelectedPathComponent();
+                    DefaultTreeModel model = (DefaultTreeModel) my_folderTree.getModel();
                     FileNode fnode = new FileNode(file);
                     DefaultMutableTreeNode child = new DefaultMutableTreeNode(new IconData(FOLDER_ICON,EXPENDED_ICON,fnode));
 
@@ -283,10 +359,10 @@ public class FileBros extends JFrame {
     protected class MyListSelectionListener implements ListSelectionListener {
         @Override
         public void valueChanged(ListSelectionEvent e) {
-            if (e.getValueIsAdjusting()){
-                currentFile = jList.getSelectedValue().toString();
-                File file = new File(jList.getSelectedValue().toString());
-                String myselectedfileinfo = getFileName(jList.getSelectedValue().toString());
+            if (my_fileList.getSelectedValue()!=null) {
+                currentFile = my_fileList.getSelectedValue().toString();
+                File file = new File(my_fileList.getSelectedValue().toString());
+                String myselectedfileinfo = getFileName(my_fileList.getSelectedValue().toString());
                 String bytes = humanReadableByteCount(file.length(),true);
                 my_infoNameText.setText(String.format("File name: %s", myselectedfileinfo));
                 my_infoSizeText.setText(String.format("File size: %s",bytes));
@@ -354,12 +430,13 @@ public class FileBros extends JFrame {
             Thread runner = new Thread(){
               public void run(){
                   if (fnode!=null&&fnode.expand(node)) {
-                      /*//ADDITIONAL TASK 1
-                      try {
-                          Thread.sleep(2000);
-                      } catch (InterruptedException e) {
-                          e.printStackTrace();
-                      }*/
+                      if (additionaltask) {
+                          try {
+                              Thread.sleep(2000);
+                          } catch (InterruptedException e) {
+                              e.printStackTrace();
+                          }
+                      }
                       Runnable runnable = new Runnable() {
                           @Override
                           public void run() {
@@ -404,8 +481,8 @@ public class FileBros extends JFrame {
                             vfiles.add(file1);
                         }
                     }
-                    jList.setListData(vfiles);
-                } else jList.setListData(nullvector);
+                    my_fileList.setListData(vfiles);
+                } else my_fileList.setListData(nullvector);
             } else mydisplay.setText("");
         }
     }
@@ -429,7 +506,6 @@ public class FileBros extends JFrame {
         boolean my_selected;
 
         public IconCellRenderer() {
-            super();
             my_textSelectionColor = UIManager.getColor("Tree.selectionForeground");
             my_textNonSelectedColor = UIManager.getColor("Tree.textForeground");
             my_bkSelectedColor = UIManager.getColor("Tree.selectionBackground");
