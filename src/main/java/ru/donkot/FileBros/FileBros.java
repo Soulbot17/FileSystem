@@ -1,9 +1,7 @@
 package ru.donkot.FileBros;
 import org.apache.commons.io.FileUtils;
-import sun.reflect.generics.tree.Tree;
 
 import javax.swing.*;
-import javax.swing.border.LineBorder;
 import javax.swing.event.*;
 import javax.swing.filechooser.FileSystemView;
 import javax.swing.tree.*;
@@ -12,8 +10,6 @@ import java.awt.event.*;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.HashMap;
-import java.util.TreeMap;
 import java.util.Vector;
 
 /**
@@ -37,23 +33,27 @@ public class FileBros extends JFrame {
     private static final ImageIcon FOLDERC_ICON = new ImageIcon("src/main/java/ru/donkot/FileBros/iconset/createfolder16.png");
     private static final ImageIcon FOLDERD_ICON = new ImageIcon("src/main/java/ru/donkot/FileBros/iconset/deletefolder16.png");
     private static final ImageIcon FOLDERB_ICON = new ImageIcon("src/main/java/ru/donkot/FileBros/iconset/browsefolder16.png");
-    private static final ImageIcon REFRESH_ICON = new ImageIcon("src/main/java/ru/donkot/FileBros/iconset/refresh16.png");
     private static final ImageIcon TITLE_ICON = new ImageIcon("src/main/java/ru/donkot/FileBros/iconset/progicon.png");
     private static final ImageIcon SEARCH_ICON = new ImageIcon("src/main/java/ru/donkot/FileBros/iconset/search-icon.png");
     private static final ImageIcon HISTORY_ICON = new ImageIcon("src/main/java/ru/donkot/FileBros/iconset/history-icon.png");
+    private static final ImageIcon TNFOLDER_ICON = new ImageIcon("src/main/java/ru/donkot/FileBros/iconset/nicon16.png");
+    private static final ImageIcon TSEARCH_ICON = new ImageIcon("src/main/java/ru/donkot/FileBros/iconset/sicon16.png");
 
     private JTree my_folderTree;
     private JTextField mydisplay;
     private DefaultTreeModel mytreemodel;
     private JList my_fileList = new JList();
     private Vector nullvector = new Vector();
+    //          info panel
     private JLabel my_infoNameText = new JLabel("File name: no file selected yet.");
     private JLabel my_infoSizeText = new JLabel("File size: ...");
     private JLabel my_infoEditedText = new JLabel("File last edited: ...");
     private JLabel my_infoPathText = new JLabel("File path: ...");
     private JLabel my_infoIsHidden = new JLabel("File is hidden: ...");
+
     private JTextField my_textFind;
-    Vector<File> my_history = new Vector<>(); // storing searched filed
+    Vector<File> my_history = new Vector<>(); // storing searched files
+
     private String currentFile = null;
     private String currentFolder = null;
     private DefaultMutableTreeNode currentNode = null;
@@ -101,7 +101,6 @@ public class FileBros extends JFrame {
             @Override
             public void windowClosing(WindowEvent e) {
                     System.exit(0);
-
             }
         });
 
@@ -131,14 +130,17 @@ public class FileBros extends JFrame {
         JPanel panel = new JPanel();
         Font font = new Font(Font.DIALOG,Font.BOLD,12);
         panel.setLayout(new BoxLayout(panel,BoxLayout.X_AXIS));
+
         JButton createButton = new JButton(FOLDERC_ICON);
         createButton.setText("Create folder");
         createButton.setFont(font);
         createButton.addActionListener(new MyCreateFolderFilstener());
+
         JButton deleteButton = new JButton(FOLDERD_ICON);
         deleteButton.setText("Delete folder");
         deleteButton.setFont(font);
         deleteButton.addActionListener(new MyDeleteFolderFilstener());
+
         JButton browseButton = new JButton(FOLDERB_ICON);
         browseButton.setText("Browse folder");
         browseButton.setFont(font);
@@ -155,92 +157,120 @@ public class FileBros extends JFrame {
                 }
             }
         });
-        JButton refreshButton = new JButton(REFRESH_ICON);
-        refreshButton.setText("Refresh");
-        refreshButton.setFont(font);
-        refreshButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                new FileBros();
-                dispose();
-            }
-        });
 
-        panel.add(createButton);
-        panel.add(deleteButton);
-        panel.add(browseButton);
-        panel.add(refreshButton);
-
-        //          right panel with search and history
-        JPanel panelCon = new JPanel(new BorderLayout());
-        JPanel panelFind = new JPanel();
-        panelFind.setLayout(new BoxLayout(panelFind,BoxLayout.X_AXIS));
-        Font findFont = new Font(Font.DIALOG,Font.PLAIN,15);
-        my_textFind = new JTextField(12);
-        my_textFind.setFont(findFont);
-        my_textFind.setBorder(new LineBorder(Color.DARK_GRAY));
         JButton searchButton = new JButton(SEARCH_ICON);
         searchButton.setText("Search");
         searchButton.setFont(font);
-        JButton historyButton = new JButton(HISTORY_ICON);
-        historyButton.setFont(font);
-        historyButton.setText("History");
-        historyButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                my_fileList.setListData(my_history);
-            }
-        });
-        searchButton.addActionListener(new MyFindListener());
-        panelFind.add(my_textFind);
-        panelFind.add(searchButton);
-        panelFind.add(historyButton);
-        panelCon.add(panelFind,BorderLayout.EAST);
-        panel.add(panelCon);
+        searchButton.addActionListener(new MyFindButtonListener());
+
+        panel.add(createButton);
+        panel.add(deleteButton);
+        panel.add(searchButton);
+        panel.add(browseButton);
 
         return panel;
     }
     //          find button activity
-    protected class MyFindListener implements ActionListener {
-        Vector<File> fdata = new Vector<>(); //
+    protected class MyFindButtonListener implements ActionListener {
+        JFrame searchFrame;
+        JButton searchButton;
+        JButton historyButton;
+        Font searchFont = new Font(Font.DIALOG,Font.PLAIN,15);
+        Font buttonFont = new Font(Font.DIALOG,Font.BOLD,12);
+
         @Override
         public void actionPerformed(ActionEvent e) {
-            fdata = new Vector<>();
-            my_fileList.removeAll();
-            find(currentFolder,my_textFind.getText());
-            my_textFind.setText("");
-            for (File s : fdata) {
-                my_history.add(s);
-            }
-        }
+            searchFrame = new JFrame("Search");
+            searchFrame.setIconImage(TSEARCH_ICON.getImage());
+            searchFrame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+            searchFrame.setSize(300,100);
+            searchFrame.setLocationRelativeTo(null);
+            searchFrame.setLayout(new FlowLayout());
 
-        void find(String path, String find) {
-            try {
-                File f = new File(path);
-                String[] list = f.list();//     file list
-                if (list.length<1) return;
-                for (String file : list) {      //проверка на совпадение
-                    if (find.equals(file)) {
-                        fdata.add(new File(path,file));;
-                    }
-                    if (!path.endsWith("\\")) {
-                        path += "\\";
-                    }
-                    File tempfile = new File(path, file);
-                    if (!file.equals(".") && !file.equals("..")) {        //!!!
-                        if (tempfile.isDirectory()) {      //иначе проверяем, если это папка
-                            find(path + file, find);               //то рекурсивный вызов этой функции
-                        }
+            my_textFind = new JTextField(15);
+            my_textFind.setFont(searchFont);
+            my_textFind.addKeyListener(new MyFindListener());
+
+            searchButton = new JButton(SEARCH_ICON);
+            searchButton.addActionListener(new MyFindListener());
+            searchButton.setFont(buttonFont);
+
+            historyButton = new JButton(HISTORY_ICON);
+            historyButton.setFont(buttonFont);
+            historyButton.setText("History");
+            historyButton.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    if (my_history.size()!=0) {
+                        my_fileList.setListData(my_history);
                     }
                 }
-                my_fileList.setListData(fdata);
-            } catch (NullPointerException c) {
-                mydisplay.setText("Can't search here");
+            });
+
+            searchFrame.add(my_textFind);
+            searchFrame.add(searchButton);
+            searchFrame.add(historyButton);
+            searchFrame.pack();
+            searchFrame.setVisible(true);
+        }
+
+        protected class MyFindListener extends KeyAdapter implements ActionListener {
+            Vector<File> fdata = new Vector<>(); //
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                fdata = new Vector<>();
+                my_fileList.removeAll();
+                find(currentFolder,my_textFind.getText());
+                my_textFind.setText("");
+                for (File s : fdata) {
+                    my_history.add(s);
+                }
             }
 
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode()==KeyEvent.VK_ENTER) {
+                    fdata = new Vector<>();
+                    my_fileList.removeAll();
+                    find(currentFolder,my_textFind.getText());
+                    my_textFind.setText("");
+                    for (File s : fdata) {
+                        my_history.add(s);
+                    }
+                }
+            }
+
+            //          search method
+            void find(String path, String find) {
+                try {
+                    File f = new File(path);
+                    String[] list = f.list();
+                    if (list.length<1) return;
+                    for (String file : list) {
+                        if (find.equals(file)) {
+                            fdata.add(new File(path,file));;
+                        }
+                        if (!path.endsWith("\\")) {
+                            path += "\\";
+                        }
+                        File tempfile = new File(path, file);
+                        if (!file.equals(".") && !file.equals("..")) {
+                            if (tempfile.isDirectory()) {
+                                find(path + file, find);
+                            }
+                        }
+                    }
+                    my_fileList.setListData(fdata);
+                    searchFrame.dispose();
+                } catch (NullPointerException c) {
+                    mydisplay.setText("Can't search here");
+                }
+
+            }
         }
     }
 
+    //          delete button activity
     protected class MyDeleteFolderFilstener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
@@ -273,6 +303,8 @@ public class FileBros extends JFrame {
             }
         }
     }
+
+    //          create button activity
     protected class MyCreateFolderFilstener implements ActionListener {
         JFrame frame;
         JTextField textFileName;
@@ -289,6 +321,7 @@ public class FileBros extends JFrame {
             if (file.isDirectory()&&file.canWrite()&&file!=null) {
                 Font font = new Font(Font.DIALOG, Font.PLAIN, 16);
                 frame = new JFrame("New Folder");
+                frame.setIconImage(TNFOLDER_ICON.getImage());
                 frame.setSize(300, 100);
                 frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
                 frame.setLocationRelativeTo(null);
@@ -455,6 +488,7 @@ public class FileBros extends JFrame {
         }
     }
 
+    //          when you select node in file tree...
     class DirSelectionListener implements TreeSelectionListener{
         @Override
         public void valueChanged(TreeSelectionEvent e) {
@@ -555,7 +589,7 @@ public class FileBros extends JFrame {
         }
     }
 
-
+    //          file nodes to tree
     class FileNode {
         File my_file;
 
@@ -642,7 +676,7 @@ public class FileBros extends JFrame {
         }
     }
 
-
+    //          stores information about object's icons
     class IconData {
         Icon n_icon;
         Icon n_expanded;
