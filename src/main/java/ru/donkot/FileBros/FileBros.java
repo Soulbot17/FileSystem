@@ -24,7 +24,7 @@ import java.util.Vector;
 
 public class FileBros extends JFrame {
 
-    private final boolean additionaltask = false; // set "true" to enable lazy loading
+    private boolean additionaltask = false; // set "true" to enable lazy loading
 
     private static final ImageIcon DISK_ICON = new ImageIcon("src/main/java/ru/donkot/FileBros/iconset/disk24.png");
     private static final ImageIcon FOLDER_ICON = new ImageIcon("src/main/java/ru/donkot/FileBros/iconset/folder24.png");
@@ -38,6 +38,7 @@ public class FileBros extends JFrame {
     private static final ImageIcon HISTORY_ICON = new ImageIcon("src/main/java/ru/donkot/FileBros/iconset/history-icon.png");
     private static final ImageIcon TNFOLDER_ICON = new ImageIcon("src/main/java/ru/donkot/FileBros/iconset/nicon16.png");
     private static final ImageIcon TSEARCH_ICON = new ImageIcon("src/main/java/ru/donkot/FileBros/iconset/sicon16.png");
+    private static final ImageIcon LAZYLOAD_ICON = new ImageIcon("src/main/java/ru/donkot/FileBros/iconset/lazyicon.png");
 
     private JTree my_folderTree;
     private JTextField mydisplay;
@@ -69,21 +70,21 @@ public class FileBros extends JFrame {
         setIconImage(TITLE_ICON.getImage());
         setSize(Toolkit.getDefaultToolkit().getScreenSize().width/2,Toolkit.getDefaultToolkit().getScreenSize().height/2);
         setLocationRelativeTo(null);
-        DefaultMutableTreeNode top = new DefaultMutableTreeNode(new IconData(COMPUTER_ICON,null,"PC"));
+        DefaultMutableTreeNode top = new DefaultMutableTreeNode(new IconData(COMPUTER_ICON,null,"PC")); // главная иконка
 
         DefaultMutableTreeNode node;
-        File[] list = File.listRoots();
+        File[] list = File.listRoots(); // диски
         for (File aList : list) {
             node = new DefaultMutableTreeNode(new IconData(DISK_ICON, null, new FileNode(aList)));
-            top.add(node);
-            node.add(new DefaultMutableTreeNode(Boolean.TRUE));
+            top.add(node); // добавляю к иконке компа диски
+            node.add(new DefaultMutableTreeNode(Boolean.TRUE)); // может иметь "детей"
         }
-        mytreemodel = new DefaultTreeModel(top);
-        my_folderTree = new JTree(mytreemodel);
-        my_folderTree.setIgnoreRepaint(true);
-        my_folderTree.putClientProperty("JTree.lineStyle","Aligned");
-        TreeCellRenderer renderer = new IconCellRenderer();
-        my_folderTree.setCellRenderer(renderer);
+        mytreemodel = new DefaultTreeModel(top); // закладываю основу модели
+        my_folderTree = new JTree(mytreemodel); // создаю дерево по модели
+        my_folderTree.setIgnoreRepaint(true); // улучшение фул скрин мода, хуй знает
+        my_folderTree.putClientProperty("JTree.lineStyle","Aligned"); // стырил из шпаргалки по jtree
+        TreeCellRenderer renderer = new IconCellRenderer(); // иконочки для дерева
+        my_folderTree.setCellRenderer(renderer); // кастомные, чтоб веселее было
         my_folderTree.addTreeSelectionListener(new DirSelectionListener());
         my_folderTree.addTreeExpansionListener(new DirExpansionListener());
         my_folderTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
@@ -163,10 +164,29 @@ public class FileBros extends JFrame {
         searchButton.setFont(font);
         searchButton.addActionListener(new MyFindButtonListener());
 
+        JButton lazyButton = new JButton(LAZYLOAD_ICON);
+        lazyButton.setText("Lazy loading");
+        lazyButton.setFont(font);
+        lazyButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (additionaltask) {
+                    mydisplay.setText("Lazy loading disabled");
+                    additionaltask = false;
+
+                } else {
+                    mydisplay.setText("Lazy loading enabled");
+                    additionaltask = true;
+                }
+
+            }
+        });
+
         panel.add(createButton);
         panel.add(deleteButton);
         panel.add(searchButton);
         panel.add(browseButton);
+        panel.add(lazyButton);
 
         return panel;
     }
@@ -436,7 +456,7 @@ public class FileBros extends JFrame {
         return panel;
     }
 
-    //          get TreeNode from path
+    //          tree node = last selected tree component
     private DefaultMutableTreeNode getTreeNode(TreePath path) {
         return (DefaultMutableTreeNode) path.getLastPathComponent();
     }
@@ -444,11 +464,11 @@ public class FileBros extends JFrame {
     //          get FileNode from TreeNode
     private FileNode getFileNode(DefaultMutableTreeNode node) {
         if (node==null) return null;
-        Object obj = node.getUserObject();
-        if (obj instanceof IconData) {
+        Object obj = node.getUserObject(); // get selected object
+        if (obj instanceof IconData) { //если объект икон дата, вернуть икондату
             obj = ((IconData) obj).getData();
         }
-        if (obj instanceof FileNode) {
+        if (obj instanceof FileNode) { // если ФН - то фн
             return (FileNode) obj;
         } else return null;
     }
@@ -539,7 +559,7 @@ public class FileBros extends JFrame {
 
         boolean my_selected;
 
-        public IconCellRenderer() {
+        public IconCellRenderer() { //  созданным цветам присваиваем цвета системы
             my_textSelectionColor = UIManager.getColor("Tree.selectionForeground");
             my_textNonSelectedColor = UIManager.getColor("Tree.textForeground");
             my_bkSelectedColor = UIManager.getColor("Tree.selectionBackground");
@@ -549,13 +569,13 @@ public class FileBros extends JFrame {
         }
 
         @Override
-        public Component getTreeCellRendererComponent(JTree tree, Object value, boolean selected, boolean expanded, boolean leaf, int row, boolean hasFocus) {
-            DefaultMutableTreeNode node = (DefaultMutableTreeNode) value;
-            Object obj = node.getUserObject();
-            setText(obj.toString());
+        public Component getTreeCellRendererComponent(JTree tree, Object value, boolean selected, boolean expanded, boolean leaf, int row, boolean hasFocus) { //создание иконок jtree
+            DefaultMutableTreeNode node = (DefaultMutableTreeNode) value; // пиздим значение
+            Object obj = node.getUserObject(); // зачем то копирую в отдельный объект
+            setText(obj.toString()); // меняем текст на текст объекта (название файла)
 
-            if (obj instanceof Boolean) setText("Waiting for data...");
-            if (obj instanceof IconData) {
+            if (obj instanceof Boolean) setText("Waiting for data..."); // если false - ждём
+            if (obj instanceof IconData) { // если икондата
                 IconData idata = (IconData) obj;
                 if (expanded) {
                     setIcon(idata.getExpanded());
@@ -607,45 +627,45 @@ public class FileBros extends JFrame {
         }
 
         boolean expand(DefaultMutableTreeNode parent) {
-            DefaultMutableTreeNode flag = (DefaultMutableTreeNode) parent.getFirstChild();
+            DefaultMutableTreeNode flag = (DefaultMutableTreeNode) parent.getFirstChild(); // смотрим, можно ли развернуть папку
             if (flag==null) { //no flag
                 return false;
             }
-            Object obj = flag.getUserObject();
+            Object obj = flag.getUserObject(); // присваиваем первого потомка к объекту
             if (!(obj instanceof Boolean)) { //already expanded
                 return false;
             }
             parent.removeAllChildren(); //remove flag
 
-            File[]files = listFiles();
-            if (files==null) return true;
+            File[]files = listFiles(); // массив объектов
+            if (files==null) return true; // есои пустой - вернуть ИСТИНУ
 
             Vector v = new Vector();
-            for (File f : files) {
-                if (!(f.isDirectory())) continue;
+            for (File f : files) { // пока в массиве файлов есть файлы
+                if (!(f.isDirectory())) continue; // если не дерриктория - продолжаем
 
-                FileNode fnode = new FileNode(f);
-                boolean isAdded = false;
-                for (int i = 0; i < v.size(); i++) {
-                    FileNode nd = (FileNode) v.elementAt(i);
-                    if (fnode.compareTo(nd) < 0) {
-                        v.insertElementAt(fnode, i);
-                        isAdded = true;
+                FileNode fnode = new FileNode(f); // делаем файл нод из файла
+                boolean isAdded = false; // не добавлено
+                for (int i = 0; i < v.size(); i++) { // от 0 до конца вектора
+                    FileNode nd = (FileNode) v.elementAt(i); // беру i обект
+                    if (fnode.compareTo(nd) < 0) {  // если имя меньше
+                        v.insertElementAt(fnode, i); // добавить filenode на место i
+                        isAdded = true; // флаг добавлено
                         break;
                     }
                 }
-                if (!isAdded) {
+                if (!isAdded) { // если не добавилось - ДОБАВИТЬ
                     v.addElement(fnode);
                 }
             }
-            for (int i = 0; i<v.size();i++) {
+            for (int i = 0; i<v.size();i++) { // от 0 до конца вектора
                 FileNode nd = (FileNode) v.elementAt(i);
-                IconData data = new IconData(FileBros.FOLDER_ICON, FileBros.EXPENDED_ICON,nd);
-                DefaultMutableTreeNode node = new DefaultMutableTreeNode(data);
-                parent.add(node);
+                IconData data = new IconData(FileBros.FOLDER_ICON, FileBros.EXPENDED_ICON,nd); // делаем иконочку папки для дерева из файл нод
+                DefaultMutableTreeNode node = new DefaultMutableTreeNode(data); // создаём node девера
+                parent.add(node); // добавляем эту иконку к корневому каталогу
 
-                if (nd.hasSubDirs()) {
-                    node.add(new DefaultMutableTreeNode(Boolean.TRUE));
+                if (nd.hasSubDirs()) { // если у нода есть поддерриктории
+                    node.add(new DefaultMutableTreeNode(Boolean.TRUE)); // может иметь "детей"
                 }
             }
             return true;
@@ -664,11 +684,11 @@ public class FileBros extends JFrame {
             return false;
         }
 
-        int compareTo(FileNode toCompare) {
+        int compareTo(FileNode toCompare) { //сравнение длины имени
             return my_file.getName().compareToIgnoreCase(toCompare.my_file.getName());
         }
 
-        File[] listFiles() {
+        File[] listFiles() { // если это папка - нахуй, null, иначе массив с файлами
             if (!my_file.isDirectory()) {
                 return null;
             }
@@ -677,7 +697,7 @@ public class FileBros extends JFrame {
     }
 
     //          stores information about object's icons
-    class IconData {
+    class IconData { // открыта, закрыта, и объект
         Icon n_icon;
         Icon n_expanded;
         Object n_data;
