@@ -44,11 +44,6 @@ public class FileBros extends JFrame {
     private String currentFolder = null;
     private DefaultMutableTreeNode currentNode = null;
 
-
-    public static void main(String[] args) {
-        new FileBros();
-    }
-
     //          my constructor
     public FileBros() throws HeadlessException {
         super("FileDude");
