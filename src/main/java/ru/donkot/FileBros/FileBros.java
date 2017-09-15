@@ -13,32 +13,17 @@ import java.text.SimpleDateFormat;
 import java.util.Vector;
 
 /**
+ *
  * Created by Soulbot17
- * Trial assignment for SPLAT
  */
 /*
 @TODO NEW
-
+-refactor this shit
 @TODO BUGS
 */
 
 public class FileBros extends JFrame {
-
     private boolean additionaltask = false; // set "true" to enable lazy loading
-
-    private static final ImageIcon DISK_ICON = new ImageIcon("src/main/java/ru/donkot/FileBros/iconset/disk24.png");
-    private static final ImageIcon FOLDER_ICON = new ImageIcon("src/main/java/ru/donkot/FileBros/iconset/folder24.png");
-    private static final ImageIcon EXPENDED_ICON = new ImageIcon("src/main/java/ru/donkot/FileBros/iconset/expfolder24.png");
-    private static final ImageIcon COMPUTER_ICON = new ImageIcon("src/main/java/ru/donkot/FileBros/iconset/computer24.png");
-    private static final ImageIcon FOLDERC_ICON = new ImageIcon("src/main/java/ru/donkot/FileBros/iconset/createfolder16.png");
-    private static final ImageIcon FOLDERD_ICON = new ImageIcon("src/main/java/ru/donkot/FileBros/iconset/deletefolder16.png");
-    private static final ImageIcon FOLDERB_ICON = new ImageIcon("src/main/java/ru/donkot/FileBros/iconset/browsefolder16.png");
-    private static final ImageIcon TITLE_ICON = new ImageIcon("src/main/java/ru/donkot/FileBros/iconset/progicon.png");
-    private static final ImageIcon SEARCH_ICON = new ImageIcon("src/main/java/ru/donkot/FileBros/iconset/search-icon.png");
-    private static final ImageIcon HISTORY_ICON = new ImageIcon("src/main/java/ru/donkot/FileBros/iconset/history-icon.png");
-    private static final ImageIcon TNFOLDER_ICON = new ImageIcon("src/main/java/ru/donkot/FileBros/iconset/nicon16.png");
-    private static final ImageIcon TSEARCH_ICON = new ImageIcon("src/main/java/ru/donkot/FileBros/iconset/sicon16.png");
-    private static final ImageIcon LAZYLOAD_ICON = new ImageIcon("src/main/java/ru/donkot/FileBros/iconset/lazyicon.png");
 
     private JTree my_folderTree;
     private JTextField mydisplay;
@@ -67,15 +52,15 @@ public class FileBros extends JFrame {
     //          my constructor
     public FileBros() throws HeadlessException {
         super("FileDude");
-        setIconImage(TITLE_ICON.getImage());
+        setIconImage(MyIconSet.getTitleIcon().getImage());
         setSize(Toolkit.getDefaultToolkit().getScreenSize().width/2,Toolkit.getDefaultToolkit().getScreenSize().height/2);
         setLocationRelativeTo(null);
-        DefaultMutableTreeNode top = new DefaultMutableTreeNode(new IconData(COMPUTER_ICON,null,"PC")); // главная иконка
+        DefaultMutableTreeNode top = new DefaultMutableTreeNode(new IconData(MyIconSet.getComputerIcon(),null,"PC")); // главная иконка
 
         DefaultMutableTreeNode node;
         File[] list = File.listRoots(); // диски
         for (File aList : list) {
-            node = new DefaultMutableTreeNode(new IconData(DISK_ICON, null, new FileNode(aList)));
+            node = new DefaultMutableTreeNode(new IconData(MyIconSet.getDiskIcon(), null, new FileNode(aList)));
             top.add(node); // добавляю к иконке компа диски
             node.add(new DefaultMutableTreeNode(Boolean.TRUE)); // может иметь "детей"
         }
@@ -132,17 +117,17 @@ public class FileBros extends JFrame {
         Font font = new Font(Font.DIALOG,Font.BOLD,12);
         panel.setLayout(new BoxLayout(panel,BoxLayout.X_AXIS));
 
-        JButton createButton = new JButton(FOLDERC_ICON);
+        JButton createButton = new JButton(MyIconSet.getFoldercIcon());
         createButton.setText("Create folder");
         createButton.setFont(font);
         createButton.addActionListener(new MyCreateFolderFilstener());
 
-        JButton deleteButton = new JButton(FOLDERD_ICON);
+        JButton deleteButton = new JButton(MyIconSet.getFolderdIcon());
         deleteButton.setText("Delete folder");
         deleteButton.setFont(font);
         deleteButton.addActionListener(new MyDeleteFolderFilstener());
 
-        JButton browseButton = new JButton(FOLDERB_ICON);
+        JButton browseButton = new JButton(MyIconSet.getFolderbIcon());
         browseButton.setText("Browse folder");
         browseButton.setFont(font);
         browseButton.addActionListener(new ActionListener() {
@@ -159,12 +144,12 @@ public class FileBros extends JFrame {
             }
         });
 
-        JButton searchButton = new JButton(SEARCH_ICON);
+        JButton searchButton = new JButton(MyIconSet.getSearchIcon());
         searchButton.setText("Search");
         searchButton.setFont(font);
         searchButton.addActionListener(new MyFindButtonListener());
 
-        JButton lazyButton = new JButton(LAZYLOAD_ICON);
+        JButton lazyButton = new JButton(MyIconSet.getLazyloadIcon());
         lazyButton.setText("Lazy loading");
         lazyButton.setFont(font);
         lazyButton.addActionListener(new ActionListener() {
@@ -201,7 +186,7 @@ public class FileBros extends JFrame {
         @Override
         public void actionPerformed(ActionEvent e) {
             searchFrame = new JFrame("Search");
-            searchFrame.setIconImage(TSEARCH_ICON.getImage());
+            searchFrame.setIconImage(MyIconSet.getTsearchIcon().getImage());
             searchFrame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
             searchFrame.setSize(300,100);
             searchFrame.setLocationRelativeTo(null);
@@ -211,11 +196,11 @@ public class FileBros extends JFrame {
             my_textFind.setFont(searchFont);
             my_textFind.addKeyListener(new MyFindListener());
 
-            searchButton = new JButton(SEARCH_ICON);
+            searchButton = new JButton(MyIconSet.getSearchIcon());
             searchButton.addActionListener(new MyFindListener());
             searchButton.setFont(buttonFont);
 
-            historyButton = new JButton(HISTORY_ICON);
+            historyButton = new JButton(MyIconSet.getHistoryIcon());
             historyButton.setFont(buttonFont);
             historyButton.setText("History");
             historyButton.addActionListener(new ActionListener() {
@@ -236,8 +221,7 @@ public class FileBros extends JFrame {
 
         protected class MyFindListener extends KeyAdapter implements ActionListener {
             Vector<File> fdata = new Vector<>(); //
-            @Override
-            public void actionPerformed(ActionEvent e) {
+            private void doActions() {
                 fdata = new Vector<>();
                 my_fileList.removeAll();
                 find(currentFolder,my_textFind.getText());
@@ -246,17 +230,15 @@ public class FileBros extends JFrame {
                     my_history.add(s);
                 }
             }
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                doActions();
+            }
 
             @Override
             public void keyPressed(KeyEvent e) {
                 if (e.getKeyCode()==KeyEvent.VK_ENTER) {
-                    fdata = new Vector<>();
-                    my_fileList.removeAll();
-                    find(currentFolder,my_textFind.getText());
-                    my_textFind.setText("");
-                    for (File s : fdata) {
-                        my_history.add(s);
-                    }
+                    doActions();
                 }
             }
 
@@ -341,7 +323,7 @@ public class FileBros extends JFrame {
             if (file.isDirectory()&&file.canWrite()&&file!=null) {
                 Font font = new Font(Font.DIALOG, Font.PLAIN, 16);
                 frame = new JFrame("New Folder");
-                frame.setIconImage(TNFOLDER_ICON.getImage());
+                frame.setIconImage(MyIconSet.getTnfolderIcon().getImage());
                 frame.setSize(300, 100);
                 frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
                 frame.setLocationRelativeTo(null);
@@ -349,7 +331,7 @@ public class FileBros extends JFrame {
 
                 textFileName = new JTextField(14);
                 textFileName.setFont(font);
-                JButton button = new JButton(FOLDERC_ICON);
+                JButton button = new JButton(MyIconSet.getFoldercIcon());
                 button.addActionListener(new CreateFolderListener());
                 textFileName.addKeyListener(new CreateFolderListener());
                 frame.add(textFileName);
@@ -371,7 +353,7 @@ public class FileBros extends JFrame {
                     DefaultMutableTreeNode node = (DefaultMutableTreeNode) my_folderTree.getLastSelectedPathComponent();
                     DefaultTreeModel model = (DefaultTreeModel) my_folderTree.getModel();
                     FileNode fnode = new FileNode(file);
-                    DefaultMutableTreeNode child = new DefaultMutableTreeNode(new IconData(FOLDER_ICON,EXPENDED_ICON,fnode));
+                    DefaultMutableTreeNode child = new DefaultMutableTreeNode(new IconData(MyIconSet.getFolderIcon(), MyIconSet.getExpendedIcon(),fnode));
 
                     node.add(child);
                     model.reload(node);
@@ -609,127 +591,6 @@ public class FileBros extends JFrame {
         }
     }
 
-    //          file nodes to tree
-    class FileNode {
-        File my_file;
-
-        public FileNode(File my_file) {
-            this.my_file = my_file;
-        }
-
-        File getFile() {
-            return my_file;
-        }
-
-        @Override
-        public String toString() {
-            return my_file.getName().length() > 0 ? my_file.getName() : my_file.getPath();
-        }
-
-        boolean expand(DefaultMutableTreeNode parent) {
-            DefaultMutableTreeNode flag = (DefaultMutableTreeNode) parent.getFirstChild(); // смотрим, можно ли развернуть папку
-            if (flag==null) { //no flag
-                return false;
-            }
-            Object obj = flag.getUserObject(); // присваиваем первого потомка к объекту
-            if (!(obj instanceof Boolean)) { //already expanded
-                return false;
-            }
-            parent.removeAllChildren(); //remove flag
-
-            File[]files = listFiles(); // массив объектов
-            if (files==null) return true; // есои пустой - вернуть ИСТИНУ
-
-            Vector v = new Vector();
-            for (File f : files) { // пока в массиве файлов есть файлы
-                if (!(f.isDirectory())) continue; // если не дерриктория - продолжаем
-
-                FileNode fnode = new FileNode(f); // делаем файл нод из файла
-                boolean isAdded = false; // не добавлено
-                for (int i = 0; i < v.size(); i++) { // от 0 до конца вектора
-                    FileNode nd = (FileNode) v.elementAt(i); // беру i обект
-                    if (fnode.compareTo(nd) < 0) {  // если имя меньше
-                        v.insertElementAt(fnode, i); // добавить filenode на место i
-                        isAdded = true; // флаг добавлено
-                        break;
-                    }
-                }
-                if (!isAdded) { // если не добавилось - ДОБАВИТЬ
-                    v.addElement(fnode);
-                }
-            }
-            for (int i = 0; i<v.size();i++) { // от 0 до конца вектора
-                FileNode nd = (FileNode) v.elementAt(i);
-                IconData data = new IconData(FileBros.FOLDER_ICON, FileBros.EXPENDED_ICON,nd); // делаем иконочку папки для дерева из файл нод
-                DefaultMutableTreeNode node = new DefaultMutableTreeNode(data); // создаём node девера
-                parent.add(node); // добавляем эту иконку к корневому каталогу
-
-                if (nd.hasSubDirs()) { // если у нода есть поддерриктории
-                    node.add(new DefaultMutableTreeNode(Boolean.TRUE)); // может иметь "детей"
-                }
-            }
-            return true;
-        }
-
-        boolean hasSubDirs() {
-            File[] files = listFiles();
-            if (files==null) {
-                return false;
-            }
-            for (File file : files) {
-                if (file.isDirectory()) {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        int compareTo(FileNode toCompare) { //сравнение длины имени
-            return my_file.getName().compareToIgnoreCase(toCompare.my_file.getName());
-        }
-
-        File[] listFiles() { // если это папка - нахуй, null, иначе массив с файлами
-            if (!my_file.isDirectory()) {
-                return null;
-            }
-            return my_file.listFiles();
-        }
-    }
-
-    //          stores information about object's icons
-    class IconData { // открыта, закрыта, и объект
-        Icon n_icon;
-        Icon n_expanded;
-        Object n_data;
-
-        public IconData(Icon n_icon, Icon n_expanded, Object n_data) {
-            this.n_icon = n_icon;
-            this.n_expanded = n_expanded;
-            this.n_data = n_data;
-        }
-
-        public IconData(Icon n_icon, Object n_data) {
-            this.n_icon = n_icon;
-            this.n_data = n_data;
-            this.n_expanded = null;
-        }
-
-        public Icon getIcon() {
-            return n_icon;
-        }
-
-        public Icon getExpanded() {
-            return n_expanded!=null ? n_expanded : n_icon;
-        }
-
-        public Object getData() {
-            return n_data;
-        }
-
-        public String toString() {
-            return n_data.toString();
-        }
-    }
 
 
     //          get name from path
