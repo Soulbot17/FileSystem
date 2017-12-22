@@ -1,4 +1,4 @@
-package ru.donkot.FileBros;
+package ru.donkot.FileBros.cellsnicons;
 
 import javax.swing.*;
 
@@ -6,6 +6,7 @@ import javax.swing.*;
  * Created by Я on 15.09.2017.
  */
 public class MyIconSet {
+    //CONSTANTS
     private static final ImageIcon DISK_ICON = new ImageIcon("src/main/java/ru/donkot/FileBros/iconset/disk24.png");
     private static final ImageIcon FOLDER_ICON = new ImageIcon("src/main/java/ru/donkot/FileBros/iconset/folder24.png");
     private static final ImageIcon EXPENDED_ICON = new ImageIcon("src/main/java/ru/donkot/FileBros/iconset/expfolder24.png");
@@ -18,8 +19,8 @@ public class MyIconSet {
     private static final ImageIcon HISTORY_ICON = new ImageIcon("src/main/java/ru/donkot/FileBros/iconset/history-icon.png");
     private static final ImageIcon TNFOLDER_ICON = new ImageIcon("src/main/java/ru/donkot/FileBros/iconset/nicon16.png");
     private static final ImageIcon TSEARCH_ICON = new ImageIcon("src/main/java/ru/donkot/FileBros/iconset/sicon16.png");
-    private static final ImageIcon LAZYLOAD_ICON = new ImageIcon("src/main/java/ru/donkot/FileBros/iconset/lazyicon.png");
 
+    //GETTERS
     public static ImageIcon getDiskIcon() {
         return DISK_ICON;
     }
@@ -66,9 +67,5 @@ public class MyIconSet {
 
     public static ImageIcon getTsearchIcon() {
         return TSEARCH_ICON;
-    }
-
-    public static ImageIcon getLazyloadIcon() {
-        return LAZYLOAD_ICON;
     }
 }

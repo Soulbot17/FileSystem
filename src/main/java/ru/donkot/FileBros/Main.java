@@ -5,6 +5,7 @@ package ru.donkot.FileBros;
  */
 public class Main {
     public static void main(String[] args) {
-        new FileBros();
+        FileBros fileBros = new FileBros();
+        fileBros.start();
     }
 }

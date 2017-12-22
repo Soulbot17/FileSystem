@@ -1,15 +1,17 @@
-package ru.donkot.FileBros;
+package ru.donkot.FileBros.cellsnicons;
 
 import javax.swing.*;
 
 /**
  * Created by Я on 15.09.2017.
  */
-class IconData { // открыта, закрыта, и объект // stores information about object's icons
-    Icon n_icon;
-    Icon n_expanded;
-    Object n_data;
+public class IconData { // открыта, закрыта, и объект // stores information about object's icons
+    //FIELDS
+    private Icon n_icon;
+    private Icon n_expanded;
+    private Object n_data;
 
+    //CONSTRUCTORS
     public IconData(Icon n_icon, Icon n_expanded, Object n_data) {
         this.n_icon = n_icon;
         this.n_expanded = n_expanded;
@@ -22,6 +24,7 @@ class IconData { // открыта, закрыта, и объект // stores in
         this.n_expanded = null;
     }
 
+    //FUNCTIONS'N'GETTERS
     public Icon getIcon() {
         return n_icon;
     }

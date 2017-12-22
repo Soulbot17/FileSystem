@@ -1,5 +1,8 @@
 package ru.donkot.FileBros;
 
+import ru.donkot.FileBros.cellsnicons.IconData;
+import ru.donkot.FileBros.cellsnicons.MyIconSet;
+
 import javax.swing.tree.DefaultMutableTreeNode;
 import java.io.File;
 import java.util.Vector;
@@ -7,24 +10,27 @@ import java.util.Vector;
 /**
  * file nodes to tree
  */
-class FileNode {
+public class FileNode {
+    //FIELDS
+    private File myFile;
 
-    File my_file;
-
-    public FileNode(File my_file) {
-        this.my_file = my_file;
+    //CONSTRUCTOR
+    public FileNode(File myFile) {
+        this.myFile = myFile;
     }
 
-    File getFile() {
-        return my_file;
+    //GETTERS AND SETTERS
+    public File getFile() {
+        return myFile;
     }
 
+    //FUNCTIONS
     @Override
     public String toString() {
-        return my_file.getName().length() > 0 ? my_file.getName() : my_file.getPath();
+        return myFile.getName().length() > 0 ? myFile.getName() : myFile.getPath();
     }
 
-    boolean expand(DefaultMutableTreeNode parent) {
+    public boolean expand(DefaultMutableTreeNode parent) {
         DefaultMutableTreeNode flag = (DefaultMutableTreeNode) parent.getFirstChild(); // смотрим, можно ли развернуть папку
         if (flag==null) { //no flag
             return false;
@@ -69,7 +75,7 @@ class FileNode {
         return true;
     }
 
-    boolean hasSubDirs() {
+    private boolean hasSubDirs() {
         File[] files = listFiles();
         if (files==null) {
             return false;
@@ -82,14 +88,14 @@ class FileNode {
         return false;
     }
 
-    int compareTo(FileNode toCompare) { //сравнение длины имени
-        return my_file.getName().compareToIgnoreCase(toCompare.my_file.getName());
+    private int compareTo(FileNode toCompare) { //сравнение длины имени
+        return myFile.getName().compareToIgnoreCase(toCompare.myFile.getName());
     }
 
-    File[] listFiles() { // если это папка - нахуй, null, иначе массив с файлами
-        if (!my_file.isDirectory()) {
+    private File[] listFiles() { // если это папка - нахуй, null, иначе массив с файлами
+        if (!myFile.isDirectory()) {
             return null;
         }
-        return my_file.listFiles();
+        return myFile.listFiles();
     }
 }
