@@ -1,24 +1,30 @@
 package ru.donkot.FileBros.listeners;
 
 import ru.donkot.FileBros.FileBros;
+import ru.donkot.FileBros.Localizable;
 import ru.donkot.FileBros.panels.InfoPanel;
 
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import java.io.File;
 import java.text.SimpleDateFormat;
+import java.util.Locale;
+import java.util.ResourceBundle;
 
 // Информация на панельке при  выделении файлов
 
-public class MyListSelectionListener implements ListSelectionListener {
+public class MyListSelectionListener implements ListSelectionListener, Localizable {
     //FUNCTIONS
     private FileBros fileBros;
     private InfoPanel infoPanel;
+    private File currentFile;
+    private String mySelectedFileInfo;
+    private String bytes;
 
     //CONSTRUCTOR
-    public MyListSelectionListener(FileBros fileBros, InfoPanel infoPanel) {
+    public MyListSelectionListener(FileBros fileBros) {
         this.fileBros = fileBros;
-        this.infoPanel = infoPanel;
+        infoPanel = fileBros.getInfoPanel();
     }
 
     //FUNCTIONS
@@ -26,15 +32,10 @@ public class MyListSelectionListener implements ListSelectionListener {
     public void valueChanged(ListSelectionEvent e) {
         if (fileBros.getMyFileList().getSelectedValue() != null) {
             fileBros.setCurrentFile(fileBros.getMyFileList().getSelectedValue().toString());
-            File file = new File(fileBros.getMyFileList().getSelectedValue().toString());
-            String myselectedfileinfo = getFileName(fileBros.getMyFileList().getSelectedValue().toString());
-            String bytes = humanReadableByteCount(file.length(), true);
-            infoPanel.setMyInfoNameText(String.format("File name: %s", myselectedfileinfo));
-            infoPanel.setMyInfoSizeText(String.format("File size: %s", bytes));
-            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy, HH:mm:ss");
-            infoPanel.setMyInfoEditedText(String.format("File last edited: %s", sdf.format(file.lastModified())));
-            infoPanel.setMyInfoPathText("File path: " + file.getAbsolutePath());
-            infoPanel.setMyInfoIsHidden(String.format("File is hidden: %s", file.isHidden() ? "yes" : "no"));
+            currentFile = new File(fileBros.getMyFileList().getSelectedValue().toString());
+            mySelectedFileInfo = getFileName(fileBros.getMyFileList().getSelectedValue().toString());
+            bytes = humanReadableByteCount(currentFile.length(), true);
+            updateLocale(FileBros.resourceBundle);
         }
     }
 
@@ -49,5 +50,17 @@ public class MyListSelectionListener implements ListSelectionListener {
 
     private String getFileName(String filepath) {
         return filepath.substring(filepath.lastIndexOf("\\") + 1, filepath.length());
+    }
+
+    @Override
+    public void updateLocale(ResourceBundle bundle) {
+        if (mySelectedFileInfo!=null) {
+            infoPanel.setMyInfoNameText(String.format(bundle.getString("myInfoNameText2"), mySelectedFileInfo));
+            infoPanel.setMyInfoSizeText(String.format(bundle.getString("myInfoSizeText2"), bytes));
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy, HH:mm:ss", FileBros.resourceBundle.getLocale());
+            infoPanel.setMyInfoEditedText(String.format(bundle.getString("myInfoEditedText2"), sdf.format(currentFile.lastModified())));
+            infoPanel.setMyInfoPathText(bundle.getString("myInfoPathText2") + currentFile.getAbsolutePath());
+            infoPanel.setMyInfoIsHidden(String.format(bundle.getString("myInfoIsHidden2"), currentFile.isHidden() ? "+" : "-"));
+        } else infoPanel.updateLocale(bundle);
     }
 }

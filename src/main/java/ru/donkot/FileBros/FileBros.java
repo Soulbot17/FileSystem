@@ -12,6 +12,9 @@ import javax.swing.tree.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
+import java.nio.charset.Charset;
+import java.util.Locale;
+import java.util.ResourceBundle;
 import java.util.Vector;
 
 /**
@@ -23,9 +26,11 @@ import java.util.Vector;
 @TODO BUGS
 */
 
-public class FileBros extends JFrame {
+public class FileBros extends JFrame implements Localizable {
 
     //FIELDS
+    public static ResourceBundle resourceBundle;
+
     private JTree myFolderTree;
     private JTextField myDisplay;
     private DefaultTreeModel myTreeModel;
@@ -38,9 +43,25 @@ public class FileBros extends JFrame {
 
     private JPanel panelLeft = new JPanel(new BorderLayout());
     private JPanel panelRight = new JPanel(new BorderLayout());
-    private JPanel panelNorth;
-
+    private NorthPanel panelNorth;
+    private MyListSelectionListener listSelectionListener;
     //GETTERS AND SETTERS
+    public InfoPanel getInfoPanel() {
+        return myInfoPanel;
+    }
+
+    public JPanel getLeftPanel() {
+        return panelLeft;
+    }
+
+    public JPanel getRightPanel() {
+        return panelRight;
+    }
+
+    public NorthPanel getNorthPanel() {
+        return panelNorth;
+    }
+
     public DefaultTreeModel getMyTreeModel() {
         return myTreeModel;
     }
@@ -91,7 +112,8 @@ public class FileBros extends JFrame {
 
     //CONSTRUCTOR
     public FileBros() {
-        super("FileDude");
+        resourceBundle = ResourceBundle.getBundle("lang");
+        updateLocale(resourceBundle);
         myInfoPanel = new InfoPanel();
         panelNorth = new NorthPanel(this);
         initializeGUI();
@@ -151,7 +173,11 @@ public class FileBros extends JFrame {
         panelList.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
         myFileList.setCellRenderer(new MyListCellRenderer());
         myFileList.addMouseListener(new MyListMouseAdapter(this));
-        myFileList.addListSelectionListener(new MyListSelectionListener(this, myInfoPanel));
+
+
+
+        listSelectionListener = new MyListSelectionListener(this);
+        myFileList.addListSelectionListener(listSelectionListener);
         panelRight.add(panelList, BorderLayout.CENTER);
         panelRight.add(myInfoPanel, BorderLayout.SOUTH);
         getContentPane().add(panelRight, BorderLayout.CENTER);
@@ -172,5 +198,14 @@ public class FileBros extends JFrame {
         if (obj instanceof FileNode) { // если ФН - то фн
             return (FileNode) obj;
         } else return null;
+    }
+
+    @Override
+    public void updateLocale(ResourceBundle bundle) {
+        resourceBundle = bundle;
+        setTitle(bundle.getString("title"));
+        if (listSelectionListener!=null) {
+            listSelectionListener.updateLocale(bundle);
+        }
     }
 }

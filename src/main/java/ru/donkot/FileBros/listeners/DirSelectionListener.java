@@ -17,7 +17,6 @@ public class DirSelectionListener implements TreeSelectionListener {
     //FIELDS
     private FileBros fileBros;
     private InfoPanel infoPanel;
-    private Vector nullvector = new Vector();
 
     //CONSTRUCTOR
     public DirSelectionListener(FileBros fileBros, InfoPanel infoPanel) {
@@ -28,7 +27,7 @@ public class DirSelectionListener implements TreeSelectionListener {
     //FUNCTIONS
     @Override
     public void valueChanged(TreeSelectionEvent e) {
-        infoPanel.clearInfoPanel();
+        infoPanel.updateLocale(FileBros.resourceBundle);
         fileBros.setCurrentFolder(e.getPath().toString());
         DefaultMutableTreeNode node = fileBros.getTreeNode(e.getPath());
         fileBros.setCurrentNode(fileBros.getTreeNode(e.getPath()));
@@ -51,8 +50,7 @@ public class DirSelectionListener implements TreeSelectionListener {
                     }
                 }
                 fileBros.setMyFileListData(vfiles);
-                //myFileList.setListData(vfiles);
-            } else fileBros.setMyFileListData(nullvector);
+            } else fileBros.setMyFileListData(new Vector());
         } else fileBros.setMydisplayText("");
     }
 }

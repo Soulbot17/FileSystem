@@ -1,33 +1,29 @@
 package ru.donkot.FileBros.panels;
 
+import ru.donkot.FileBros.FileBros;
+import ru.donkot.FileBros.Localizable;
+
 import javax.swing.*;
 import java.awt.*;
+import java.util.ResourceBundle;
 
-public class InfoPanel extends JPanel {
+public class InfoPanel extends JPanel implements Localizable{
     //FIELDS
-    private JLabel myInfoNameText = new JLabel("File name: no file selected yet.");
-    private JLabel myInfoSizeText = new JLabel("File size: ...");
-    private JLabel myInfoEditedText = new JLabel("File last edited: ...");
-    private JLabel myInfoPathText = new JLabel("File path: ...");
-    private JLabel myInfoIsHidden = new JLabel("File is hidden: ...");
+    private JLabel myInfoNameText;
+    private JLabel myInfoSizeText;
+    private JLabel myInfoEditedText;
+    private JLabel myInfoPathText;
+    private JLabel myInfoIsHidden;
 
+    private Font font = new Font(Font.SANS_SERIF, Font.PLAIN, 12);
     //CONSTRUCTOR
     public InfoPanel() {
-
-        Font font = new Font(Font.SANS_SERIF, Font.PLAIN, 12);
         setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
         setFocusable(false);
         setBorder(BorderFactory.createEtchedBorder());
-        myInfoNameText.setFont(font);
-        add(myInfoNameText);
-        myInfoSizeText.setFont(font);
-        add(myInfoSizeText);
-        myInfoEditedText.setFont(font);
-        myInfoIsHidden.setFont(font);
-        add(myInfoIsHidden);
-        add(myInfoEditedText);
-        myInfoPathText.setFont(font);
-        add(myInfoPathText);
+
+        prepareTextLabels();
+        updateLocale(FileBros.resourceBundle);
     }
 
     //GETTERS AND SETTERS
@@ -50,11 +46,35 @@ public class InfoPanel extends JPanel {
     }
 
     //FUNCTIONS
-    public void clearInfoPanel() {
-        myInfoNameText.setText("File name: no file selected yet.");
-        myInfoSizeText.setText("File size: ...");
-        myInfoEditedText.setText("File last edited: ...");
-        myInfoPathText.setText("File path: ...");
-        myInfoIsHidden.setText("File is hidden: ...");
+
+    private void prepareTextLabels() {
+        myInfoNameText = new JLabel();
+        myInfoNameText.setFont(font);
+        add(myInfoNameText);
+
+        myInfoSizeText = new JLabel();
+        myInfoSizeText.setFont(font);
+        add(myInfoSizeText);
+
+        myInfoEditedText = new JLabel();
+        myInfoEditedText.setFont(font);
+        add(myInfoEditedText);
+
+        myInfoPathText = new JLabel();
+        myInfoPathText.setFont(font);
+        add(myInfoPathText);
+
+        myInfoIsHidden = new JLabel();
+        myInfoIsHidden.setFont(font);
+        add(myInfoIsHidden);
+    }
+
+    @Override
+    public void updateLocale(ResourceBundle bundle) {
+        myInfoNameText.setText(bundle.getString("myInfoNameText"));
+        myInfoSizeText.setText(bundle.getString("myInfoSizeText"));
+        myInfoEditedText.setText(bundle.getString("myInfoEditedText"));
+        myInfoPathText.setText(bundle.getString("myInfoPathText"));
+        myInfoIsHidden.setText(bundle.getString("myInfoIsHidden"));
     }
 }

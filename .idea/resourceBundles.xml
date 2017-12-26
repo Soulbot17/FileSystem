@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ResourceBundleManager">
+    <file url="file://$PROJECT_DIR$/resources/main.java.ru.donkot.FileBros/local.properties" />
+    <file url="file://$PROJECT_DIR$/resources/main.java.ru.donkot.FileBros/local_ru_RU.properties" />
+    <custom-resource-bundle>
+      <file value="file://$PROJECT_DIR$/resources/local_us_US.properties" />
+      <file value="file://$PROJECT_DIR$/resources/main.java.ru.donkot.FileBros/local.properties" />
+      <file value="file://$PROJECT_DIR$/resources/main.java.ru.donkot.FileBros/local_ru_RU.properties" />
+      <base-name>local</base-name>
+    </custom-resource-bundle>
+  </component>
+</project>

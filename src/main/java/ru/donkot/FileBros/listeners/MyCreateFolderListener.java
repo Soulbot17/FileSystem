@@ -2,6 +2,7 @@ package ru.donkot.FileBros.listeners;
 
 import ru.donkot.FileBros.FileBros;
 import ru.donkot.FileBros.FileNode;
+import ru.donkot.FileBros.Localizable;
 import ru.donkot.FileBros.cellsnicons.IconData;
 import ru.donkot.FileBros.cellsnicons.MyIconSet;
 
@@ -14,10 +15,11 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.io.File;
+import java.util.ResourceBundle;
 
 //          кнопка создания папки
 
-public class MyCreateFolderListener implements ActionListener {
+public class MyCreateFolderListener implements ActionListener, Localizable{
     //FIELDS
     private JFrame frame;
     private JTextField textFileName;
@@ -58,6 +60,11 @@ public class MyCreateFolderListener implements ActionListener {
             frame.pack();
             frame.setVisible(true);
         } else fileBros.setMydisplayText("Can't write here");
+    }
+
+    @Override
+    public void updateLocale(ResourceBundle bundle) {
+
     }
 
     class CreateFolderListener extends KeyAdapter implements ActionListener {
