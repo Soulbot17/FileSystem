@@ -74,7 +74,6 @@ public class MyCreateFolderListener implements ActionListener, Localizable{
                 if (!file.mkdir()) {
                     fileBros.setMydisplayText("Can't create folder here");
                 } else file.mkdir();
-                System.out.println("created");
 
                 DefaultMutableTreeNode node = (DefaultMutableTreeNode) fileBros.getMyFolderTree().getLastSelectedPathComponent();
                 DefaultTreeModel model = (DefaultTreeModel) fileBros.getMyFolderTree().getModel();

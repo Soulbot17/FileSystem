@@ -39,7 +39,6 @@ public class TopMenu extends JMenuBar implements Localizable{
         gerItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                System.out.println("CHANGE 1");
                 fileBros.updateLocale(ResourceBundle.getBundle("lang", new Locale("de","CH")));
             }
         });
