@@ -39,7 +39,7 @@ public class DirSelectionListener implements TreeSelectionListener, Localizable{
         if (fnode != null) {
             fileBros.setCurrentFolder(fnode.getFile().getAbsolutePath());
             try {
-                filesCount = fnode.getFile().listFiles().length;
+                filesCount = fnode.getFile().listFiles()==null ? 0 : fnode.getFile().listFiles().length;
                 fileBros.setMydisplayText(FileBros.resourceBundle.getString("selectionFiles") + String.valueOf(filesCount));
             } catch (NullPointerException g) {
                 fileBros.setMydisplayText("");
@@ -59,8 +59,6 @@ public class DirSelectionListener implements TreeSelectionListener, Localizable{
 
     @Override
     public void updateLocale(ResourceBundle bundle) {
-        if (fnode.getFile().listFiles()!=null&&fnode!=null) {
-            fileBros.setMydisplayText(FileBros.resourceBundle.getString("selectionFiles") + String.valueOf(filesCount));
-        }
+        fileBros.setMydisplayText(FileBros.resourceBundle.getString("selectionFiles") + String.valueOf(filesCount));
     }
 }
