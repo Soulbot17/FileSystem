@@ -46,7 +46,6 @@ public class InfoPanel extends JPanel implements Localizable{
     }
 
     //FUNCTIONS
-
     private void prepareTextLabels() {
         myInfoNameText = new JLabel();
         myInfoNameText.setFont(font);

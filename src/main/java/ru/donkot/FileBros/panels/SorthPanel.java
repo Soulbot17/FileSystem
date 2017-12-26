@@ -17,7 +17,7 @@ import java.io.IOException;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
-public class NorthPanel extends JPanel implements Localizable{
+public class SorthPanel extends JPanel implements Localizable{
     //FIELDS
     private FileBros fileBros;
     private Font font = new Font(Font.DIALOG, Font.BOLD, 12);
@@ -25,11 +25,9 @@ public class NorthPanel extends JPanel implements Localizable{
     private JButton deleteButton;
     private JButton searchButton;
     private JButton browseButton;
-    private JButton languageButton;
-    private MyLanguageButtonListener languageButtonListener;
 
     //CONSTRUCTOR
-    public NorthPanel(final FileBros fileBros) {
+    public SorthPanel(final FileBros fileBros) {
         setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
         this.fileBros = fileBros;
 
@@ -37,24 +35,14 @@ public class NorthPanel extends JPanel implements Localizable{
         deleteButton = makeDeleteButton();
         browseButton = makeBrowseButton();
         searchButton = makeSearchButton();
-        languageButton = makeLanguageButton();
-
 
         add(createButton);
         add(deleteButton);
         add(searchButton);
         add(browseButton);
-        add(languageButton);
     }
 
-    private JButton makeLanguageButton() {
-        languageButton = new JButton("EN / RUS");
-        languageButton.setFont(font);
-        languageButtonListener = new MyLanguageButtonListener(fileBros);
-        languageButton.addActionListener(languageButtonListener);
-        return languageButton;
-    }
-
+    //FUNCTIONS
     private JButton makeSearchButton() {
         searchButton = new JButton(MyIconSet.getSearchIcon());
         searchButton.setText(FileBros.resourceBundle.getString("searchFolder"));

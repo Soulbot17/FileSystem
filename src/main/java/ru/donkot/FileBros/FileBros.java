@@ -5,15 +5,14 @@ import ru.donkot.FileBros.cellsnicons.MyIconSet;
 import ru.donkot.FileBros.cellsnicons.*;
 import ru.donkot.FileBros.listeners.*;
 import ru.donkot.FileBros.panels.InfoPanel;
-import ru.donkot.FileBros.panels.NorthPanel;
+import ru.donkot.FileBros.panels.TopMenu;
+import ru.donkot.FileBros.panels.SorthPanel;
 
 import javax.swing.*;
 import javax.swing.tree.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
-import java.nio.charset.Charset;
-import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.Vector;
 
@@ -43,8 +42,11 @@ public class FileBros extends JFrame implements Localizable {
 
     private JPanel panelLeft = new JPanel(new BorderLayout());
     private JPanel panelRight = new JPanel(new BorderLayout());
-    private NorthPanel panelNorth;
+    private SorthPanel panelSouth;
+    private TopMenu topBar;
+
     private MyListSelectionListener listSelectionListener;
+    private DirSelectionListener dirSelectionListener;;
     //GETTERS AND SETTERS
     public InfoPanel getInfoPanel() {
         return myInfoPanel;
@@ -58,8 +60,8 @@ public class FileBros extends JFrame implements Localizable {
         return panelRight;
     }
 
-    public NorthPanel getNorthPanel() {
-        return panelNorth;
+    public SorthPanel getSouthPanel() {
+        return panelSouth;
     }
 
     public DefaultTreeModel getMyTreeModel() {
@@ -115,7 +117,7 @@ public class FileBros extends JFrame implements Localizable {
         resourceBundle = ResourceBundle.getBundle("lang");
         updateLocale(resourceBundle);
         myInfoPanel = new InfoPanel();
-        panelNorth = new NorthPanel(this);
+        panelSouth = new SorthPanel(this);
         initializeGUI();
     }
 
@@ -128,8 +130,49 @@ public class FileBros extends JFrame implements Localizable {
         setIconImage(MyIconSet.getTitleIcon().getImage());
         setSize(Toolkit.getDefaultToolkit().getScreenSize().width / 2, Toolkit.getDefaultToolkit().getScreenSize().height / 2);
         setLocationRelativeTo(null);
-        DefaultMutableTreeNode top = new DefaultMutableTreeNode(new IconData(MyIconSet.getComputerIcon(), null, "PC")); // главная иконка
 
+        prepareTreeNodes();
+
+        myDisplay = new JTextField(32);
+        myDisplay.setEditable(false);
+
+
+        JScrollPane paneTree = new JScrollPane(myFolderTree);
+        paneTree.setWheelScrollingEnabled(true);
+        paneTree.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+        paneTree.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                System.exit(0);
+            }
+        });
+
+        panelLeft.add(paneTree, BorderLayout.CENTER);
+        panelLeft.add(myDisplay, BorderLayout.SOUTH);
+
+
+
+        JScrollPane panelList = new JScrollPane(myFileList);
+        panelList.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+        myFileList.setCellRenderer(new MyListCellRenderer());
+        myFileList.addMouseListener(new MyListMouseAdapter(this));
+
+        listSelectionListener = new MyListSelectionListener(this);
+        myFileList.addListSelectionListener(listSelectionListener);
+        panelRight.add(panelList, BorderLayout.CENTER);
+        panelRight.add(myInfoPanel, BorderLayout.SOUTH);
+
+        topBar = new TopMenu(this);
+        getContentPane().add(panelSouth, BorderLayout.SOUTH);
+        getContentPane().add(panelLeft, BorderLayout.WEST);
+        getContentPane().add(panelRight, BorderLayout.CENTER);
+        getContentPane().add(topBar, BorderLayout.NORTH);
+    }
+
+    private void prepareTreeNodes() {
+        DefaultMutableTreeNode top = new DefaultMutableTreeNode(new IconData(MyIconSet.getComputerIcon(), null, "PC")); // главная иконка
         DefaultMutableTreeNode node;
         File[] list = File.listRoots(); // диски
         for (File aList : list) {
@@ -147,40 +190,9 @@ public class FileBros extends JFrame implements Localizable {
         myFolderTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
         myFolderTree.setShowsRootHandles(true);
         myFolderTree.setEditable(false);
-        myFolderTree.addTreeSelectionListener(new DirSelectionListener(this, myInfoPanel));
 
-        myDisplay = new JTextField(32);
-        myDisplay.setEditable(false);
-
-        getContentPane().add(panelNorth, BorderLayout.NORTH);
-        JScrollPane paneTree = new JScrollPane(myFolderTree);
-        paneTree.setWheelScrollingEnabled(true);
-        paneTree.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-        paneTree.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-
-        addWindowListener(new WindowAdapter() {
-            @Override
-            public void windowClosing(WindowEvent e) {
-                System.exit(0);
-            }
-        });
-
-        panelLeft.add(paneTree, BorderLayout.CENTER);
-        panelLeft.add(myDisplay, BorderLayout.SOUTH);
-        getContentPane().add(panelLeft, BorderLayout.WEST);
-
-        JScrollPane panelList = new JScrollPane(myFileList);
-        panelList.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-        myFileList.setCellRenderer(new MyListCellRenderer());
-        myFileList.addMouseListener(new MyListMouseAdapter(this));
-
-
-
-        listSelectionListener = new MyListSelectionListener(this);
-        myFileList.addListSelectionListener(listSelectionListener);
-        panelRight.add(panelList, BorderLayout.CENTER);
-        panelRight.add(myInfoPanel, BorderLayout.SOUTH);
-        getContentPane().add(panelRight, BorderLayout.CENTER);
+        dirSelectionListener = new DirSelectionListener(this, myInfoPanel);
+        myFolderTree.addTreeSelectionListener(dirSelectionListener);
     }
 
 
@@ -204,8 +216,17 @@ public class FileBros extends JFrame implements Localizable {
     public void updateLocale(ResourceBundle bundle) {
         resourceBundle = bundle;
         setTitle(bundle.getString("title"));
+        if (topBar!=null) {
+            topBar.updateLocale(bundle);
+        }
         if (listSelectionListener!=null) {
             listSelectionListener.updateLocale(bundle);
+        }
+        if (panelSouth !=null) {
+            panelSouth.updateLocale(bundle);
+        }
+        if (dirSelectionListener!=null) {
+            dirSelectionListener.updateLocale(bundle);
         }
     }
 }
