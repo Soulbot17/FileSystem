@@ -39,12 +39,22 @@ public class TopMenu extends JMenuBar implements Localizable{
         gerItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                System.out.println("CHANGE 1");
                 fileBros.updateLocale(ResourceBundle.getBundle("lang", new Locale("de","CH")));
+            }
+        });
+
+        JMenuItem chiItem = new JMenuItem(FileBros.resourceBundle.getString("chinaLang"));
+        chiItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                fileBros.updateLocale(ResourceBundle.getBundle("lang", new Locale("zh", "HK")));
             }
         });
         menu.add(engItem);
         menu.add(rusItem);
         menu.add(gerItem);
+        menu.add(chiItem);
         add(menu);
     }
 

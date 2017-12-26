@@ -10,6 +10,7 @@ import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import java.io.File;
 import java.text.SimpleDateFormat;
+import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.Vector;
 
