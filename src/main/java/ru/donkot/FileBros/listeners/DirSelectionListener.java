@@ -20,6 +20,7 @@ public class DirSelectionListener implements TreeSelectionListener, Localizable{
     private FileBros fileBros;
     private InfoPanel infoPanel;
     private FileNode fnode;
+    private int filesCount;
     //CONSTRUCTOR
     public DirSelectionListener(FileBros fileBros, InfoPanel infoPanel) {
         this.fileBros = fileBros;
@@ -37,9 +38,9 @@ public class DirSelectionListener implements TreeSelectionListener, Localizable{
         Vector<File> vfiles = new Vector<>();
         if (fnode != null) {
             fileBros.setCurrentFolder(fnode.getFile().getAbsolutePath());
-            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy, HH:mm:ss");
             try {
-                fileBros.setMydisplayText(FileBros.resourceBundle.getString("selectionFiles") + String.valueOf(fnode.getFile().listFiles().length));
+                filesCount = fnode.getFile().listFiles().length;
+                fileBros.setMydisplayText(FileBros.resourceBundle.getString("selectionFiles") + String.valueOf(filesCount));
             } catch (NullPointerException g) {
                 fileBros.setMydisplayText("");
             }
@@ -58,8 +59,8 @@ public class DirSelectionListener implements TreeSelectionListener, Localizable{
 
     @Override
     public void updateLocale(ResourceBundle bundle) {
-        if (fnode!=null) {
-            fileBros.setMydisplayText(FileBros.resourceBundle.getString("selectionFiles") + String.valueOf(fnode.getFile().listFiles().length));
+        if (fnode.getFile().listFiles()!=null&&fnode!=null) {
+            fileBros.setMydisplayText(FileBros.resourceBundle.getString("selectionFiles") + String.valueOf(filesCount));
         }
     }
 }
