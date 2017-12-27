@@ -31,12 +31,13 @@ public class MyDeleteFolderListener implements ActionListener {
         }
         File file = new File(fileBros.getCurrentFolder());
         if (!file.canWrite()) return;
-        int reply = JOptionPane.showConfirmDialog(null, "Delete this folder?", "", JOptionPane.YES_NO_OPTION);
+        JOptionPane.setDefaultLocale(FileBros.resourceBundle.getLocale());
+        int reply = new JOptionPane().showConfirmDialog(null, FileBros.resourceBundle.getString("deleteFolderMessage"), "", JOptionPane.YES_NO_OPTION);
         if (reply == JOptionPane.YES_OPTION) {
             try {
                 FileUtils.deleteDirectory(file);
             } catch (IOException e1) {
-                fileBros.setMydisplayText("Can't delete this directory");
+                fileBros.setMydisplayText(FileBros.resourceBundle.getString("cantDeleteFolder"));
             }
             DefaultTreeModel model = (DefaultTreeModel) fileBros.getMyFolderTree().getModel();
             model.removeNodeFromParent(fileBros.getCurrentNode());

@@ -38,12 +38,12 @@ public class MyCreateFolderListener implements ActionListener, Localizable{
         try {
             file = new File(fileBros.getCurrentFolder());
         } catch (NullPointerException c) {
-            fileBros.setMydisplayText("Select folder first");
+            fileBros.setMydisplayText(FileBros.resourceBundle.getString("selectFolderFirst"));
         }
 
         if (file!=null && file.isDirectory() && file.canWrite()) {
             Font font = new Font(Font.DIALOG, Font.PLAIN, 16);
-            frame = new JFrame("New Folder");
+            frame = new JFrame(FileBros.resourceBundle.getString("folderTitle"));
             frame.setIconImage(MyIconSet.getTnfolderIcon().getImage());
             frame.setSize(300, 100);
             frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
@@ -59,7 +59,7 @@ public class MyCreateFolderListener implements ActionListener, Localizable{
             frame.add(button);
             frame.pack();
             frame.setVisible(true);
-        } else fileBros.setMydisplayText("Can't write here");
+        } else fileBros.setMydisplayText(FileBros.resourceBundle.getString("cantWriteHere"));
     }
 
     @Override
@@ -72,7 +72,7 @@ public class MyCreateFolderListener implements ActionListener, Localizable{
             if (!textFileName.getText().equals("")) {
                 File file = new File(fileBros.getCurrentFolder() + "\\" + textFileName.getText());
                 if (!file.mkdir()) {
-                    fileBros.setMydisplayText("Can't create folder here");
+                    fileBros.setMydisplayText(FileBros.resourceBundle.getString("cantCreateFolderHere"));
                 } else file.mkdir();
 
                 DefaultMutableTreeNode node = (DefaultMutableTreeNode) fileBros.getMyFolderTree().getLastSelectedPathComponent();

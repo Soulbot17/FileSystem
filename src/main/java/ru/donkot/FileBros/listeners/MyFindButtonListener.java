@@ -32,7 +32,7 @@ public class MyFindButtonListener implements ActionListener {
     //FUNCTIONS
     @Override
     public void actionPerformed(ActionEvent e) {
-        searchFrame = new JFrame("Search");
+        searchFrame = new JFrame(FileBros.resourceBundle.getString("searchTitle"));
         searchFrame.setIconImage(MyIconSet.getTsearchIcon().getImage());
         searchFrame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         searchFrame.setSize(300, 100);
@@ -49,7 +49,7 @@ public class MyFindButtonListener implements ActionListener {
 
         JButton historyButton = new JButton(MyIconSet.getHistoryIcon());
         historyButton.setFont(buttonFont);
-        historyButton.setText("History");
+        historyButton.setText(FileBros.resourceBundle.getString("historyButton"));
         historyButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -98,7 +98,6 @@ public class MyFindButtonListener implements ActionListener {
                 for (String file : list) {
                     if (find.equals(file)) {
                         fdata.add(new File(path, file));
-                        ;
                     }
                     if (!path.endsWith("\\")) {
                         path += "\\";
@@ -113,7 +112,7 @@ public class MyFindButtonListener implements ActionListener {
                 fileBros.setMyFileListData(fdata);
                 searchFrame.dispose();
             } catch (NullPointerException c) {
-                fileBros.setMydisplayText("Can't search here");
+                fileBros.setMydisplayText(FileBros.resourceBundle.getString("cantSearchHere"));
             }
 
         }
