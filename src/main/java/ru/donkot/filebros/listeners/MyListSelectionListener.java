@@ -1,14 +1,13 @@
-package ru.donkot.FileBros.listeners;
+package ru.donkot.filebros.listeners;
 
-import ru.donkot.FileBros.FileBros;
-import ru.donkot.FileBros.Localizable;
-import ru.donkot.FileBros.panels.InfoPanel;
+import ru.donkot.filebros.FileBros;
+import ru.donkot.filebros.Localizable;
+import ru.donkot.filebros.panels.InfoPanel;
 
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import java.io.File;
 import java.text.SimpleDateFormat;
-import java.util.Locale;
 import java.util.ResourceBundle;
 
 // Информация на панельке при  выделении файлов
@@ -35,7 +34,7 @@ public class MyListSelectionListener implements ListSelectionListener, Localizab
             currentFile = new File(fileBros.getMyFileList().getSelectedValue().toString());
             mySelectedFileInfo = getFileName(fileBros.getMyFileList().getSelectedValue().toString());
             bytes = humanReadableByteCount(currentFile.length(), true);
-            updateLocale(FileBros.resourceBundle);
+            updateLocale(fileBros.getResourceBundle());
         }
     }
 
@@ -49,7 +48,7 @@ public class MyListSelectionListener implements ListSelectionListener, Localizab
     }
 
     private String getFileName(String filepath) {
-        return filepath.substring(filepath.lastIndexOf("\\") + 1, filepath.length());
+        return filepath.substring(filepath.lastIndexOf('\\') + 1, filepath.length());
     }
 
     @Override
@@ -57,7 +56,7 @@ public class MyListSelectionListener implements ListSelectionListener, Localizab
         if (mySelectedFileInfo!=null) {
             infoPanel.setMyInfoNameText(String.format(bundle.getString("myInfoNameText2"), mySelectedFileInfo));
             infoPanel.setMyInfoSizeText(String.format(bundle.getString("myInfoSizeText2"), bytes));
-            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy, HH:mm:ss", FileBros.resourceBundle.getLocale());
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy, HH:mm:ss", fileBros.getResourceBundle().getLocale());
             infoPanel.setMyInfoEditedText(String.format(bundle.getString("myInfoEditedText2"), sdf.format(currentFile.lastModified())));
             infoPanel.setMyInfoPathText(bundle.getString("myInfoPathText2") + currentFile.getAbsolutePath());
             infoPanel.setMyInfoIsHidden(String.format(bundle.getString("myInfoIsHidden2"), currentFile.isHidden() ? "+" : "-"));

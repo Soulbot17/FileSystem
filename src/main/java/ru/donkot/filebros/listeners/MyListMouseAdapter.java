@@ -1,6 +1,7 @@
-package ru.donkot.FileBros.listeners;
+package ru.donkot.filebros.listeners;
 
-import ru.donkot.FileBros.FileBros;
+import lombok.extern.log4j.Log4j2;
+import ru.donkot.filebros.FileBros;
 
 import java.awt.*;
 import java.awt.event.MouseAdapter;
@@ -10,6 +11,7 @@ import java.io.IOException;
 
 // Двойной клик для открытия файла
 
+@Log4j2
 public class MyListMouseAdapter extends MouseAdapter {
     //FIELDS
     private FileBros fileBros;
@@ -27,7 +29,7 @@ public class MyListMouseAdapter extends MouseAdapter {
             try {
                 desktop.open(new File(fileBros.getCurrentFile()));
             } catch (IOException e1) {
-                e1.printStackTrace();
+                log.error("MyListMouseAdapter in mouseClicked: ", e1);
             }
         }
     }

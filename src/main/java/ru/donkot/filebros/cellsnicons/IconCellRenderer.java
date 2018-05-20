@@ -1,4 +1,4 @@
-package ru.donkot.FileBros.cellsnicons;
+package ru.donkot.filebros.cellsnicons;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -7,21 +7,21 @@ import java.awt.*;
 //          nice icons for my JTree
 public class IconCellRenderer extends JLabel implements TreeCellRenderer {
     //FIELDS
-    private Color my_textSelectionColor;
-    private Color my_textNonSelectedColor;
-    private Color my_bkSelectedColor;
-    private Color my_bkNonSelectedColor;
-    private Color my_borderSelectedColor;
+    private Color myTextSelectionColor;
+    private Color myTextNonSelectedColor;
+    private Color myBkSelectedColor;
+    private Color myBkNonSelectedColor;
+    private Color myBorderSelectedColor;
 
-    private boolean my_selected;
+    private boolean isSelected;
 
     //CONSTRUCTOR
     public IconCellRenderer() { //  созданным цветам присваиваем цвета системы
-        my_textSelectionColor = UIManager.getColor("Tree.selectionForeground");
-        my_textNonSelectedColor = UIManager.getColor("Tree.textForeground");
-        my_bkSelectedColor = UIManager.getColor("Tree.selectionBackground");
-        my_bkNonSelectedColor = UIManager.getColor("Tree.textBackground");
-        my_borderSelectedColor = UIManager.getColor("Tree.selectionBorderColor");
+        myTextSelectionColor = UIManager.getColor("Tree.selectionForeground");
+        myTextNonSelectedColor = UIManager.getColor("Tree.textForeground");
+        myBkSelectedColor = UIManager.getColor("Tree.selectionBackground");
+        myBkNonSelectedColor = UIManager.getColor("Tree.textBackground");
+        myBorderSelectedColor = UIManager.getColor("Tree.selectionBorderColor");
         setOpaque(false);
     }
 
@@ -40,9 +40,9 @@ public class IconCellRenderer extends JLabel implements TreeCellRenderer {
             } else setIcon(idata.getIcon());
         } else setIcon(null);
         setFont(tree.getFont());
-        setForeground(selected ? my_textSelectionColor : my_textNonSelectedColor);
-        setBackground(selected ? my_bkSelectedColor : my_bkNonSelectedColor);
-        my_selected = selected;
+        setForeground(selected ? myTextSelectionColor : myTextNonSelectedColor);
+        setBackground(selected ? myBkSelectedColor : myBkNonSelectedColor);
+        isSelected = selected;
         return this;
     }
 
@@ -58,8 +58,8 @@ public class IconCellRenderer extends JLabel implements TreeCellRenderer {
             offset = (icon.getIconWidth() + getIconTextGap());
         }
         g.fillRect(offset, 0, getWidth() - 1 - offset, getHeight() - 1);
-        if (my_selected) {
-            g.setColor(my_borderSelectedColor);
+        if (isSelected) {
+            g.setColor(myBorderSelectedColor);
             g.drawRect(offset, 0, getWidth() - 1 - offset, getHeight() - 1);
         }
         super.paintComponent(g);

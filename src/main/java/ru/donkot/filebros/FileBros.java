@@ -1,12 +1,12 @@
-package ru.donkot.FileBros;
+package ru.donkot.filebros;
 
-import ru.donkot.FileBros.cellsnicons.IconData;
-import ru.donkot.FileBros.cellsnicons.MyIconSet;
-import ru.donkot.FileBros.cellsnicons.*;
-import ru.donkot.FileBros.listeners.*;
-import ru.donkot.FileBros.panels.InfoPanel;
-import ru.donkot.FileBros.panels.TopMenu;
-import ru.donkot.FileBros.panels.SorthPanel;
+import ru.donkot.filebros.cellsnicons.IconData;
+import ru.donkot.filebros.cellsnicons.MyIconSet;
+import ru.donkot.filebros.cellsnicons.*;
+import ru.donkot.filebros.listeners.*;
+import ru.donkot.filebros.panels.InfoPanel;
+import ru.donkot.filebros.panels.TopMenu;
+import ru.donkot.filebros.panels.SorthPanel;
 
 import javax.swing.*;
 import javax.swing.tree.*;
@@ -19,16 +19,11 @@ import java.util.Vector;
 /**
  * Created by Soulbot17
  */
-/*
-@TODO NEW
--refactor this shit
-@TODO BUGS
-*/
 
-public class FileBros extends JFrame implements Localizable {
+public class FileBros extends JFrame implements Localizable{
 
     //FIELDS
-    public static ResourceBundle resourceBundle;
+    private transient ResourceBundle resourceBundle = ResourceBundle.getBundle("lang");
 
     private JTree myFolderTree;
     private JTextField myDisplay;
@@ -45,9 +40,19 @@ public class FileBros extends JFrame implements Localizable {
     private SorthPanel panelSouth;
     private TopMenu topBar;
 
-    private MyListSelectionListener listSelectionListener;
-    private DirSelectionListener dirSelectionListener;;
+    private transient MyListSelectionListener listSelectionListener;
+    private transient DirSelectionListener dirSelectionListener;
     //GETTERS AND SETTERS
+
+
+    public ResourceBundle getResourceBundle() {
+        return resourceBundle;
+    }
+
+    public void setResourceBundle(ResourceBundle resourceBundle) {
+        this.resourceBundle = resourceBundle;
+    }
+
     public InfoPanel getInfoPanel() {
         return myInfoPanel;
     }
@@ -114,9 +119,8 @@ public class FileBros extends JFrame implements Localizable {
 
     //CONSTRUCTOR
     public FileBros() {
-        resourceBundle = ResourceBundle.getBundle("lang");
         updateLocale(resourceBundle);
-        myInfoPanel = new InfoPanel();
+        myInfoPanel = new InfoPanel(this);
         panelSouth = new SorthPanel(this);
         initializeGUI();
     }
@@ -151,7 +155,6 @@ public class FileBros extends JFrame implements Localizable {
 
         panelLeft.add(paneTree, BorderLayout.CENTER);
         panelLeft.add(myDisplay, BorderLayout.SOUTH);
-
 
 
         JScrollPane panelList = new JScrollPane(myFileList);
@@ -216,16 +219,16 @@ public class FileBros extends JFrame implements Localizable {
     public void updateLocale(ResourceBundle bundle) {
         resourceBundle = bundle;
         setTitle(bundle.getString("title"));
-        if (topBar!=null) {
+        if (topBar != null) {
             topBar.updateLocale(bundle);
         }
-        if (listSelectionListener!=null) {
+        if (listSelectionListener != null) {
             listSelectionListener.updateLocale(bundle);
         }
-        if (panelSouth !=null) {
+        if (panelSouth != null) {
             panelSouth.updateLocale(bundle);
         }
-        if (dirSelectionListener!=null) {
+        if (dirSelectionListener != null) {
             dirSelectionListener.updateLocale(bundle);
         }
     }

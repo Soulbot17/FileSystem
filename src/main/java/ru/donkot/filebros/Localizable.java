@@ -1,4 +1,4 @@
-package ru.donkot.FileBros;
+package ru.donkot.filebros;
 
 import java.util.ResourceBundle;
 

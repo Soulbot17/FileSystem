@@ -1,4 +1,4 @@
-package ru.donkot.FileBros.cellsnicons;
+package ru.donkot.filebros.cellsnicons;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileSystemView;

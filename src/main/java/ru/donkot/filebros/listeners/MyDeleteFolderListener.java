@@ -1,7 +1,7 @@
-package ru.donkot.FileBros.listeners;
+package ru.donkot.filebros.listeners;
 
 import org.apache.commons.io.FileUtils;
-import ru.donkot.FileBros.FileBros;
+import ru.donkot.filebros.FileBros;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultTreeModel;
@@ -9,6 +9,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
+import java.util.ResourceBundle;
 
 //          Кнопка удаления
 
@@ -31,13 +32,13 @@ public class MyDeleteFolderListener implements ActionListener {
         }
         File file = new File(fileBros.getCurrentFolder());
         if (!file.canWrite()) return;
-        JOptionPane.setDefaultLocale(FileBros.resourceBundle.getLocale());
-        int reply = new JOptionPane().showConfirmDialog(null, FileBros.resourceBundle.getString("deleteFolderMessage"), "", JOptionPane.YES_NO_OPTION);
+        JOptionPane.setDefaultLocale(fileBros.getResourceBundle().getLocale());
+        int reply = JOptionPane.showConfirmDialog(null, fileBros.getResourceBundle().getString("deleteFolderMessage"), "", JOptionPane.YES_NO_OPTION);
         if (reply == JOptionPane.YES_OPTION) {
             try {
                 FileUtils.deleteDirectory(file);
             } catch (IOException e1) {
-                fileBros.setMydisplayText(FileBros.resourceBundle.getString("cantDeleteFolder"));
+                fileBros.setMydisplayText(fileBros.getResourceBundle().getString("cantDeleteFolder"));
             }
             DefaultTreeModel model = (DefaultTreeModel) fileBros.getMyFolderTree().getModel();
             model.removeNodeFromParent(fileBros.getCurrentNode());

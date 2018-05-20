@@ -1,7 +1,7 @@
-package ru.donkot.FileBros.listeners;
+package ru.donkot.filebros.listeners;
 
-import ru.donkot.FileBros.FileBros;
-import ru.donkot.FileBros.cellsnicons.MyIconSet;
+import ru.donkot.filebros.FileBros;
+import ru.donkot.filebros.cellsnicons.MyIconSet;
 
 import javax.swing.*;
 import java.awt.*;
@@ -32,7 +32,7 @@ public class MyFindButtonListener implements ActionListener {
     //FUNCTIONS
     @Override
     public void actionPerformed(ActionEvent e) {
-        searchFrame = new JFrame(FileBros.resourceBundle.getString("searchTitle"));
+        searchFrame = new JFrame(fileBros.getResourceBundle().getString("searchTitle"));
         searchFrame.setIconImage(MyIconSet.getTsearchIcon().getImage());
         searchFrame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         searchFrame.setSize(300, 100);
@@ -49,13 +49,10 @@ public class MyFindButtonListener implements ActionListener {
 
         JButton historyButton = new JButton(MyIconSet.getHistoryIcon());
         historyButton.setFont(buttonFont);
-        historyButton.setText(FileBros.resourceBundle.getString("historyButton"));
-        historyButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (myHistory.size() != 0) {
-                    fileBros.setMyFileListData(myHistory);
-                }
+        historyButton.setText(fileBros.getResourceBundle().getString("historyButton"));
+        historyButton.addActionListener(e1 -> {
+            if (!myHistory.isEmpty()) {
+                fileBros.setMyFileListData(myHistory);
             }
         });
 
@@ -103,16 +100,14 @@ public class MyFindButtonListener implements ActionListener {
                         path += "\\";
                     }
                     File tempfile = new File(path, file);
-                    if (!file.equals(".") && !file.equals("..")) {
-                        if (tempfile.isDirectory()) {
-                            find(path + file, find);
-                        }
+                    if (!file.equals(".") && !file.equals("..") && tempfile.isDirectory()) {
+                        find(path + file, find);
                     }
                 }
                 fileBros.setMyFileListData(fdata);
                 searchFrame.dispose();
             } catch (NullPointerException c) {
-                fileBros.setMydisplayText(FileBros.resourceBundle.getString("cantSearchHere"));
+                fileBros.setMydisplayText(fileBros.getResourceBundle().getString("cantSearchHere"));
             }
 
         }

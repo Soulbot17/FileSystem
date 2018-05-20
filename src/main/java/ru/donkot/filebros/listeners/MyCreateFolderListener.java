@@ -1,10 +1,10 @@
-package ru.donkot.FileBros.listeners;
+package ru.donkot.filebros.listeners;
 
-import ru.donkot.FileBros.FileBros;
-import ru.donkot.FileBros.FileNode;
-import ru.donkot.FileBros.Localizable;
-import ru.donkot.FileBros.cellsnicons.IconData;
-import ru.donkot.FileBros.cellsnicons.MyIconSet;
+import ru.donkot.filebros.FileBros;
+import ru.donkot.filebros.FileNode;
+import ru.donkot.filebros.Localizable;
+import ru.donkot.filebros.cellsnicons.IconData;
+import ru.donkot.filebros.cellsnicons.MyIconSet;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -38,12 +38,12 @@ public class MyCreateFolderListener implements ActionListener, Localizable{
         try {
             file = new File(fileBros.getCurrentFolder());
         } catch (NullPointerException c) {
-            fileBros.setMydisplayText(FileBros.resourceBundle.getString("selectFolderFirst"));
+            fileBros.setMydisplayText(fileBros.getResourceBundle().getString("selectFolderFirst"));
         }
 
         if (file!=null && file.isDirectory() && file.canWrite()) {
             Font font = new Font(Font.DIALOG, Font.PLAIN, 16);
-            frame = new JFrame(FileBros.resourceBundle.getString("folderTitle"));
+            frame = new JFrame(fileBros.getResourceBundle().getString("folderTitle"));
             frame.setIconImage(MyIconSet.getTnfolderIcon().getImage());
             frame.setSize(300, 100);
             frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
@@ -59,12 +59,12 @@ public class MyCreateFolderListener implements ActionListener, Localizable{
             frame.add(button);
             frame.pack();
             frame.setVisible(true);
-        } else fileBros.setMydisplayText(FileBros.resourceBundle.getString("cantWriteHere"));
+        } else fileBros.setMydisplayText(fileBros.getResourceBundle().getString("cantWriteHere"));
     }
 
     @Override
     public void updateLocale(ResourceBundle bundle) {
-
+        // No need
     }
 
     class CreateFolderListener extends KeyAdapter implements ActionListener {
@@ -72,14 +72,14 @@ public class MyCreateFolderListener implements ActionListener, Localizable{
             if (!textFileName.getText().equals("")) {
                 File file = new File(fileBros.getCurrentFolder() + "\\" + textFileName.getText());
                 if (!file.mkdir()) {
-                    fileBros.setMydisplayText(FileBros.resourceBundle.getString("cantCreateFolderHere"));
+                    fileBros.setMydisplayText(fileBros.getResourceBundle().getString("cantCreateFolderHere"));
                 } else file.mkdir();
 
                 DefaultMutableTreeNode node = (DefaultMutableTreeNode) fileBros.getMyFolderTree().getLastSelectedPathComponent();
                 DefaultTreeModel model = (DefaultTreeModel) fileBros.getMyFolderTree().getModel();
-                FileNode fnode = new FileNode(file);
+                FileNode fileNode = new FileNode(file);
                 DefaultMutableTreeNode child =
-                        new DefaultMutableTreeNode(new IconData(MyIconSet.getFolderIcon(), MyIconSet.getExpendedIcon(), fnode));
+                        new DefaultMutableTreeNode(new IconData(MyIconSet.getFolderIcon(), MyIconSet.getExpendedIcon(), fileNode));
 
                 node.add(child);
                 model.reload(node);

@@ -1,7 +1,7 @@
-package ru.donkot.FileBros.listeners;
+package ru.donkot.filebros.listeners;
 
-import ru.donkot.FileBros.FileBros;
-import ru.donkot.FileBros.FileNode;
+import ru.donkot.filebros.FileBros;
+import ru.donkot.filebros.FileNode;
 
 import javax.swing.*;
 import javax.swing.event.TreeExpansionEvent;
@@ -23,24 +23,18 @@ public class DirExpansionListener implements TreeExpansionListener {
     @Override
     public void treeExpanded(TreeExpansionEvent event) {
         final DefaultMutableTreeNode node = fileBros.getTreeNode(event.getPath());
-        final FileNode fnode = fileBros.getFileNode(node);
-        Thread runner = new Thread() {
-            public void run() {
-                if (fnode != null && fnode.expand(node)) {
-                    Runnable runnable = new Runnable() {
-                        @Override
-                        public void run() {
-                            fileBros.getMyTreeModel().reload(node);
-                        }
-                    };
-                    SwingUtilities.invokeLater(runnable);
-                }
+        final FileNode fileNode = fileBros.getFileNode(node);
+
+        new Thread(() -> {
+            if (fileNode != null && fileNode.expand(node)) {
+                Runnable runnable = () -> fileBros.getMyTreeModel().reload(node);
+                SwingUtilities.invokeLater(runnable);
             }
-        };
-        runner.start();
+        }).start();
     }
 
     @Override
     public void treeCollapsed(TreeExpansionEvent event) {
+        //do nothing
     }
 }

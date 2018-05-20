@@ -1,6 +1,6 @@
-package ru.donkot.FileBros.listeners;
+package ru.donkot.filebros.listeners;
 
-import ru.donkot.FileBros.FileBros;
+import ru.donkot.filebros.FileBros;
 
 import javax.swing.*;
 import java.awt.*;
@@ -23,7 +23,7 @@ public class MyLanguageButtonListener implements ActionListener{
         menu.add(new JMenuItem("Русский"));
         menu.add(new JMenuItem("Английский"));
         menu.show(fileBros, Toolkit.getDefaultToolkit().getScreenSize().width / 2, Toolkit.getDefaultToolkit().getScreenSize().height / 2);
-        if (FileBros.resourceBundle.getLocale().getCountry().equals("RU")) {
+        if (fileBros.getResourceBundle().getLocale().getCountry().equals("RU")) {
             bundle = ResourceBundle.getBundle("lang", new Locale("en","US"));
             fileBros.updateLocale(bundle);
             fileBros.getSouthPanel().updateLocale(bundle);

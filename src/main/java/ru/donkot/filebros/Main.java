@@ -1,6 +1,4 @@
-package ru.donkot.FileBros;
-
-import java.nio.charset.Charset;
+package ru.donkot.filebros;
 
 /**
  * Created by Я on 15.09.2017.
